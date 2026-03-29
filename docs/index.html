@@ -3,60 +3,488 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Remotion Captioneer — Interactive Demo</title>
+<title>Remotion Captioneer — Live Demo</title>
 <style>
-...style>
-/* ...styles omitted ...</style>
-<body{background:var(--bg);color:#0a0a0f;--surface:#12121a;--surface2:#1a1a28;--border:#2a2a3a;--text:#e8e8f0;--text2:#8888a0;--radius:12px}
-.hero{text-align:center;padding:40px 20px 20px;background:#0a0a0f;`auto-cards-demo`);
-.hero-links a display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-/* Demo */
-.demo{padding:20px 0}
-/* Video canvas */
-.demo-canvas-container */
-.demo-canvas-container {
-  position:relative;inset:0;right:0;bottom:0 0px;pointer-events:none}
-.caption-overlay{position:absolute;inset:0;right:0;padding:20px;pointer-events:none}
- vid-canvas{display:block}
-.vid-canvas-container>
-  position:relative;inset:0;bottom: 0px;}
-/* Controls */
-.controls{display:flex;align-items:center;gap:10px;background:var(--surface);border-top:1px solid var(--border)}
-.p-bar-wrap{flex:1;height:4px;background #333;border-radius:2px}
-.p-fill{height:100%;width:0;pointer-events:none}
-.p-style-label{position:absolute;bottom:0 min-width:10px;font-size:italic;padding:4px 0}
-.p-bar-wrap{flex:1;height:4px;background:333;border-radius:2px}
-.prog-wrap{flex:1;height:4px;background #333;cursor:pointer}
-.p-play:hover{background:var(--accent)}
-.play-btn{width:34px;height:34px;border-radius:50px;background var(--surface2);border-color:var(--text2)}
-.play-btn{width:34px;height:34x;border-radius:5px solid var(--border);outline:none}
-select stylest.active{outline:none}
-  .cap-text{outline:none}
-  .cap-text{outline:none}
-  /* Export panel */
-.export-btns{display:flex;gap:8px;flex-wrap:wrap}
-/* Upload area */
-.upload-area{margin-top:30px;text-align: center;cursor:pointer}
-  audio upload area{margin-top:16px}
-  .upload-area p{color:var(--text2);font-size:14px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#09090f;--sf:#111118;--sf2:#191924;--bd:#262636;--tx:#e4e4ee;--tx2:#7c7c96;--ac:#6c5ce7;--ac2:#a29bfe;--gn:#00cec9;--rd:#ff6b6b;--yl:#fdcb6e}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+a{color:var(--ac2);text-decoration:none}
+.w{max-width:1100px;margin:0 auto;padding:0 20px}
 
-  /* Upload audio button starts playback */
- if (!audioElement) {
-    if (st.playing) return;
-    loadUserAudio(file) {
-    stopPlay();
-    startPlay();
-    loadUserAudio(file) startPlay();
-  loadUserAudio(file);
-    const drag & drop, upload, // Generate simulated captions
- simulate user audio playback
-    startPlay();
-    loadLine(); jump to next line. advance
- and restart playback. return;
-    loadLine();
+/* Hero */
+.hero{padding:48px 20px 28px;text-align:center;position:relative}
+.hero::after{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:500px;background:radial-gradient(circle,rgba(108,92,231,.1),transparent 70%);pointer-events:none;z-index:0}
+.hero>*{position:relative;z-index:1}
+.tag{display:inline-block;padding:3px 12px;border-radius:20px;background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.25);color:var(--ac2);font-size:12px;margin-bottom:10px}
+.hero h1{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;background:linear-gradient(135deg,#eee,#a29bfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero p{color:var(--tx2);font-size:14px;max-width:500px;margin:0 auto 18px}
+.links{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.bt{display:inline-flex;align-items:center;gap:4px;padding:7px 15px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:.2s}
+.bt1{background:var(--ac);color:#fff}.bt1:hover{background:var(--ac2)}
+.bt2{background:var(--sf2);color:var(--tx);border:1px solid var(--bd)}.bt2:hover{border-color:var(--ac)}
+
+/* Sections */
+.sec{padding:40px 0}
+.sec h2{font-size:clamp(1.2rem,3vw,1.6rem);margin-bottom:6px;text-align:center}
+.sec .sub{color:var(--tx2);text-align:center;margin-bottom:24px;font-size:13px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:16px;transition:.2s}
+.card:hover{border-color:var(--ac);transform:translateY(-2px)}
+.card h3{font-size:14px;margin-bottom:4px}.card p,.card li{font-size:12px;color:var(--tx2)}
+.card ul{padding-left:16px;margin-top:4px}
+
+/* ─── PLAYER ─── */
+.player{background:#000;border-radius:12px;overflow:hidden;max-width:780px;margin:0 auto}
+.scene{position:relative;aspect-ratio:16/9;background:#0a0a10;overflow:hidden}
+.scene canvas{position:absolute;inset:0;width:100%;height:100%}
+.cap-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.cap-el{font-weight:700;text-align:center;max-width:88%;padding:8px 16px;transition:.12s}
+
+.ctrls{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0c0c12;border-top:1px solid #1a1a28}
+.pb{width:30px;height:30px;border-radius:50%;background:var(--ac);border:none;color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.pb:hover{background:var(--ac2)}
+.pprog{flex:1;height:3px;background:#222;border-radius:2px;cursor:pointer;position:relative}
+.pfill{height:100%;background:var(--ac);border-radius:2px;width:0;transition:none}
+.ptm{font-size:10px;color:var(--tx2);font-variant-numeric:tabular-nums;min-width:55px;text-align:right}
+.pst{font-size:9px;color:var(--ac2);padding:2px 8px;background:rgba(108,92,231,.12);border-radius:8px;white-space:nowrap}
+
+/* Waveform bars */
+.wave{height:40px;background:#0a0a10;display:flex;align-items:flex-end;justify-content:center;gap:1px;padding:0 4px}
+.wbar{width:2px;background:var(--ac);border-radius:1px 1px 0 0;opacity:.4;transition:height .1s}
+
+/* Sidebar */
+.demowrap{display:grid;grid-template-columns:1fr 260px;gap:16px;max-width:1100px;margin:0 auto}
+@media(max-width:800px){.demowrap{grid-template-columns:1fr}}
+.side{display:flex;flex-direction:column;gap:10px}
+.pnl{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px}
+.pnlt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);margin-bottom:8px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.sbtn{padding:5px 4px;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;color:var(--tx);font-size:9px;cursor:pointer;text-align:center;transition:.12s;line-height:1.3}
+.sbtn:hover{border-color:var(--ac)}.sbtn.on{background:rgba(108,92,231,.2);border-color:var(--ac);color:var(--ac2)}
+.cr{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.cr label{font-size:10px;color:var(--tx2);min-width:34px}
+.cr input[type=color]{width:22px;height:18px;border:1px solid var(--bd);border-radius:3px;background:none;cursor:pointer;padding:0}
+.cr input[type=range]{flex:1;accent-color:var(--ac);height:3px}
+.cr .v{font-size:9px;color:var(--tx2);min-width:18px;text-align:right}
+select{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:3px 6px;border-radius:4px;font-size:10px;width:100%}
+.xbs{display:flex;gap:4px;flex-wrap:wrap}
+.xb{padding:4px 8px;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;color:var(--tx);font-size:9px;font-weight:600;cursor:pointer;transition:.12s}
+.xb:hover{border-color:var(--gn);color:var(--gn)}
+
+/* Feature demo tabs */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;justify-content:center}
+.tab{padding:6px 14px;background:var(--sf);border:1px solid var(--bd);border-radius:6px;color:var(--tx2);font-size:12px;cursor:pointer;transition:.2s}
+.tab:hover{border-color:var(--ac);color:var(--tx)}
+.tab.on{background:rgba(108,92,231,.15);border-color:var(--ac);color:var(--ac2)}
+.tab-panel{display:none}
+.tab-panel.on{display:block}
+
+/* Preset grid */
+.preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.preset{background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;cursor:pointer;transition:.15s}
+.preset:hover{border-color:var(--ac)}
+.preset .cat{font-size:9px;color:var(--ac);text-transform:uppercase;font-weight:700}
+.preset .nm{font-size:12px;margin-top:2px}
+
+/* Code block */
+.code{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:14px 18px;font-family:'Cascadia Code',monospace;font-size:12px;color:var(--gn);overflow-x:auto;margin-top:8px}
+.code .kw{color:var(--ac2)}.code .str{color:var(--gn)}.code .cm{color:var(--tx2)}
+
+/* CLI table */
+.cli-tbl{width:100%;border-collapse:collapse;margin-top:12px}
+.cli-tbl th,.cli-tbl td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--bd);font-size:12px}
+.cli-tbl th{color:var(--tx2);font-weight:600;font-size:11px;text-transform:uppercase}
+.cli-tbl code{background:var(--sf2);padding:2px 6px;border-radius:3px;font-size:11px;color:var(--gn)}
+
+/* Install */
+.inst{text-align:center;padding:30px 0}
+.inst h2{margin-bottom:10px;font-size:clamp(1.1rem,2.5vw,1.5rem)}
+.cmdb{display:inline-block;background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px 22px;font-family:monospace;font-size:14px;color:var(--gn);cursor:pointer;transition:.2s}
+.cmdb:hover{border-color:var(--ac)}
+
+footer{text-align:center;padding:24px 16px;border-top:1px solid var(--bd);color:var(--tx2);font-size:11px}
+footer a{margin:0 6px}
+.toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--sf2);border:1px solid var(--gn);color:var(--gn);padding:5px 12px;border-radius:6px;font-size:11px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="tag">🎬 Open Source · MIT License</span>
+  <h1>Remotion Captioneer</h1>
+  <p>14 caption styles · 5 STT providers · 24 presets · 7 export formats · audio sync · templates · layouts · emoji reactions</p>
+  <div class="links">
+    <a href="https://github.com/neutral-Stage/remotion-captioneer" target="_blank" class="bt bt1">⭐ GitHub</a>
+    <a href="https://www.npmjs.com/package/remotion-captioneer" target="_blank" class="bt bt2">📦 npm v0.9.0</a>
+    <a href="#features" class="bt bt2">📋 All Features</a>
+  </div>
+</div>
+
+<!-- ═══════ LIVE DEMO ═══════ -->
+<section class="sec" id="demo">
+  <div class="w">
+    <h2>Live Demo</h2>
+    <p class="sub">Auto-cycles through all 14 styles · Click any style to lock it</p>
+    <div class="demowrap">
+      <div>
+        <div class="player">
+          <div class="scene">
+            <canvas id="bgC"></canvas>
+            <div class="cap-layer"><div class="cap-el" id="cap"></div></div>
+          </div>
+          <div class="ctrls">
+            <button class="pb" id="ppb">▶</button>
+            <div class="pprog" id="pp"><div class="pfill" id="pf"></div></div>
+            <span class="ptm" id="pt">0:00 / 0:00</span>
+            <span class="pst" id="psn">Word Highlight</span>
+          </div>
+          <div class="wave" id="wv"></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="pnl"><div class="pnlt">Style</div><div class="sgrid" id="sg"></div></div>
+        <div class="pnl">
+          <div class="pnlt">Customize</div>
+          <div class="cr"><label>Text</label><input type="color" id="cc" value="#ffffff"></div>
+          <div class="cr"><label>Accent</label><input type="color" id="cb" value="#6c5ce7"></div>
+          <div class="cr"><label>Size</label><input type="range" id="cs" min="14" max="40" value="22"><span class="v" id="csv">22</span></div>
+        </div>
+        <div class="pnl"><div class="pnlt">Export</div><div class="xbs">
+          <button class="xb" data-f="srt">SRT</button><button class="xb" data-f="vtt">VTT</button>
+          <button class="xb" data-f="ass">ASS</button><button class="xb" data-f="json">JSON</button>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ ALL FEATURES ═══════ -->
+<section class="sec" id="features">
+  <div class="w">
+    <h2>All Features</h2>
+    <p class="sub">Everything packed into one toolkit</p>
+    <div class="tabs" id="ftabs"></div>
+    <div id="fpanels"></div>
+  </div>
+</section>
+
+<!-- ═══════ GET STARTED ═══════ -->
+<section class="inst">
+  <div class="w">
+    <h2>Get Started</h2>
+    <div class="cmdb" id="cdb">npx captioneer init my-video</div>
+    <p style="font-size:10px;color:var(--tx2);margin-top:4px">Click to copy</p>
+  </div>
+</section>
+
+<footer>
+  <a href="https://github.com/neutral-Stage/remotion-captioneer">GitHub</a>·
+  <a href="https://www.npmjs.com/package/remotion-captioneer">npm</a>·
+  <a href="https://github.com/neutral-Stage/remotion-captioneer/issues">Issues</a>· MIT License
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Data ───
+const STYLES=[
+  {id:'word-highlight',n:'Word Highlight'},{id:'karaoke',n:'Karaoke'},
+  {id:'typewriter',n:'Typewriter'},{id:'typewriter-erase',n:'Type & Erase'},
+  {id:'bounce',n:'Bounce'},{id:'wave',n:'Wave'},
+  {id:'glow',n:'Glow'},{id:'pill',n:'Pill'},
+  {id:'flicker',n:'Flicker'},{id:'highlighter',n:'Highlighter'},
+  {id:'blur',n:'Blur'},{id:'rainbow',n:'Rainbow'},
+  {id:'scale',n:'Scale'},{id:'spotlight',n:'Spotlight'}
+];
+const LINES=[
+  "Add beautiful animated captions to your Remotion videos",
+  "Fourteen unique styles to choose from karaoke glow bounce and more",
+  "Word level timing powered by five STT providers",
+  "Export to SRT VTT ASS TXT and word level formats",
+  "Built for Remotion the React video framework you already love",
+  "Audio video sync with beat detection and volume hooks",
+  "Twenty four curated presets across ten categories",
+  "Layout primitives for perfect positioning every time",
+  "Auto generate emoji reactions from your caption text",
+  "Free and open source under the MIT license forever",
+  "Full TypeScript support zero dependencies blazing fast",
+  "CLI with ten commands init process batch export preview",
+  "Template system for data driven video generation",
+  "Compatible with the official remotion captions package"
+];
+const WD=0.36;
+const PRESETS=[
+  {c:'Social',items:['TikTok Pop','Instagram Reel','YouTube Shorts','Twitter Clip']},
+  {c:'Podcast',items:['Studio Pro','Interview Clean','Solo Cast','Live Show']},
+  {c:'Cinematic',items:['Film Subtitle','Epic Trailer','Documentary','Noir']},
+  {c:'Music',items:['Karaoke Night','Lyric Video','DJ Set','Music Video']},
+  {c:'Tutorial',items:['Code Cast','Screen Record','Explainer','How To']},
+  {c:'Minimal',items:['Clean Type','Subtle Fade','Thin Line','Quiet']},
+  {c:'Gaming',items:['Streamer','Highlight Reel','Speedrun','Esports']},
+  {c:'News',items:['Breaking','Headline','Report','Anchor']},
+  {c:'Education',items:['Lecture','Flash Card','Quiz Mode','Whiteboard']},
+  {c:'Fun',items:['Meme Style','Retro VHS','Neon Glow','Comic Book']}
+];
+const PROVIDERS=[
+  {n:'Whisper.cpp (Local)',d:'Free, offline, privacy-first',icon:'🔒'},
+  {n:'OpenAI Whisper',d:'Industry standard accuracy',icon:'🎯'},
+  {n:'Groq',d:'Fastest inference, near real-time',icon:'⚡'},
+  {n:'Deepgram',d:'Enterprise grade with timestamps',icon:'🏢'},
+  {n:'AssemblyAI',d:'Speaker diarization built-in',icon:'🎙️'}
+];
+const EXPORTS=[
+  {n:'SRT',d:'Universal subtitle format'},
+  {n:'VTT',d:'Web video text tracks'},
+  {n:'ASS',d:'Advanced Substation Alpha'},
+  {n:'TXT',d:'Plain text transcript'},
+  {n:'Word SRT',d:'Word-level SRT timing'},
+  {n:'Word VTT',d:'Word-level WebVTT'},
+  {n:'@remotion/captions',d:'Official package compat'}
+];
+
+// ─── State ───
+let S={st:'word-highlight',caps:[],on:false,t0:0,dur:0,raf:null,li:0,auto:true};
+
+// ─── Init ───
+(function(){
+  buildStyleBar();buildWaveBars();buildFeatures();setupCtrl();setupExp();
+  document.getElementById('cs').oninput=function(){document.getElementById('csv').textContent=this.value};
+  document.getElementById('cdb').onclick=()=>{navigator.clipboard.writeText('npx captioneer init my-video');toast('Copied!')};
+  setTimeout(()=>{loadLine();play()},500);
+})();
+
+function buildStyleBar(){
+  const g=document.getElementById('sg');
+  STYLES.forEach(s=>{
+    const b=document.createElement('button');b.className='sbtn'+(s.id===S.st?' on':'');
+    b.textContent=s.n;b.dataset.s=s.id;
+    b.onclick=()=>{S.auto=false;pick(s.id)};g.appendChild(b);
+  });
+}
+function pick(id){
+  S.st=id;
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('on',b.dataset.s===id));
+  document.getElementById('psn').textContent=STYLES.find(s=>s.id===id).n;
+}
+function buildWaveBars(){
+  const w=document.getElementById('wv');for(let i=0;i<80;i++){const d=document.createElement('div');d.className='wbar';d.style.height='2px';w.appendChild(d);}
 }
 
+// ─── Demo Playback (timer-based, no audio API issues) ───
+function loadLine(){
+  const ln=LINES[S.li%LINES.length];const w=ln.split(' ');
+  S.caps=w.map((t,i)=>({text:t,start:i*WD,end:(i+1)*WD}));
+  S.dur=w.length*WD;
+}
+function nextLine(){S.li++;if(S.auto){const i=STYLES.findIndex(s=>s.id===S.st);pick(STYLES[(i+1)%STYLES.length].id);}loadLine();}
+
+function play(){
+  if(S.on){stop();return}
+  S.on=true;S.t0=performance.now();
+  document.getElementById('ppb').textContent='⏸';tick();
+}
+function stop(){
+  S.on=false;if(S.raf)cancelAnimationFrame(S.raf);
+  document.getElementById('ppb').textContent='▶';
+  document.getElementById('cap').textContent='';
+  document.getElementById('pf').style.width='0';
+}
+
+function tick(){
+  if(!S.on)return;
+  const el=(performance.now()-S.t0)/1000;
+  const p=Math.min(el/S.dur,1);
+  document.getElementById('pf').style.width=(p*100)+'%';
+  document.getElementById('pt').textContent=ft(el)+' / '+ft(S.dur);
+
+  const c=S.caps.find(c=>el>=c.start&&el<c.end);
+  if(c)renderCap(c,el);else document.getElementById('cap').textContent='';
+
+  updateWave(el);
+  drawBg(el);
+
+  if(p>=1){stop();nextLine();setTimeout(play,350);return;}
+  S.raf=requestAnimationFrame(tick);
+}
+function ft(s){return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+
+function setupCtrl(){
+  document.getElementById('ppb').onclick=play;
+}
+
+// ─── Background Canvas ───
+function drawBg(t){
+  const c=document.getElementById('bgC'),ctx=c.getContext('2d');
+  c.width=c.offsetWidth*2;c.height=c.offsetHeight*2;const w=c.width,h=c.height;
+  const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#0d0d16');g.addColorStop(1,'#08080e');
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  // Animated orbs
+  [[.3,.4,130,'108,92,231'],[.7,.55,140,'0,206,201'],[.5,.3,100,'162,155,254']].forEach(([ox,oy,r,c])=>{
+    const x=w*ox+Math.sin(t*.5+ox*10)*50,y=h*oy+Math.cos(t*.6+oy*10)*35;
+    const rg=ctx.createRadialGradient(x,y,0,x,y,r);
+    rg.addColorStop(0,`rgba(${c},.05)`);rg.addColorStop(1,'transparent');
+    ctx.fillStyle=rg;ctx.fillRect(0,0,w,h);
+  });
+}
+
+// ─── Waveform ───
+function updateWave(t){
+  const bars=document.querySelectorAll('.wbar');
+  bars.forEach((b,i)=>{
+    const h=4+Math.sin(t*3+i*.15)*8+Math.sin(t*5+i*.3)*4+Math.random()*3;
+    b.style.height=Math.max(2,h)+'px';b.style.opacity=.3+Math.sin(t*2+i*.2)*.2;
+  });
+}
+
+// ─── Caption Renderer ───
+function renderCap(cap,elapsed){
+  const el=document.getElementById('cap');
+  const color=document.getElementById('cc').value;
+  const bg=document.getElementById('cb').value;
+  const size=document.getElementById('cs').value;
+  const p=(elapsed-cap.start)/(cap.end-cap.start);
+
+  el.style.fontSize=size+'px';
+  el.style.color=color;
+  el.style.background='none';el.style.padding='8px 16px';
+  el.style.border='none';el.style.borderRadius='';el.style.filter='';
+  el.style.transform='';el.style.animation='';el.style.textShadow='';
+  el.style.webkitBackgroundClip='';el.style.webkitTextFillColor='';el.style.backgroundSize='';
+  el.style.opacity='1';
+
+  switch(S.st){
+    case 'word-highlight':
+      el.textContent=cap.text;el.style.textShadow=`0 0 18px ${bg}`;break;
+    case 'karaoke':{
+      const pct=Math.min(p*100,100);
+      el.textContent=cap.text;el.style.background=`linear-gradient(90deg,${bg} ${pct}%,${color} ${pct}%)`;
+      el.style.backgroundSize='100%';el.style.webkitBackgroundClip='text';el.style.webkitTextFillColor='transparent';break;}
+    case 'typewriter':{
+      const n=Math.floor(p*cap.text.length)+1;
+      el.innerHTML=cap.text.substring(0,n)+'<span style="border-right:2px solid '+bg+';margin-left:1px">&ZeroWidthSpace;</span>';break;}
+    case 'typewriter-erase':{
+      const n=p<.6?Math.floor((p/.6)*cap.text.length)+1:Math.max(1,Math.floor((1-(p-.6)/.4)*cap.text.length));
+      el.textContent=cap.text.substring(0,n);break;}
+    case 'bounce':
+      el.textContent=cap.text;el.style.transform=`scaleY(${1+Math.sin(p*Math.PI)*.25})`;
+      el.style.textShadow=`0 0 14px ${bg}`;break;
+    case 'wave':
+      el.textContent=cap.text;el.style.transform=`translateY(${Math.sin(p*Math.PI*4)*8}px)`;break;
+    case 'glow':
+      el.textContent=cap.text;el.style.color=bg;
+      el.style.textShadow=`0 0 ${10+p*30}px ${bg},0 0 ${20+p*50}px ${bg}`;break;
+    case 'pill':
+      el.textContent=cap.text;el.style.background=bg+'55';el.style.borderRadius='50px';
+      el.style.border=`1px solid ${bg}99`;break;
+    case 'flicker':
+      el.textContent=cap.text;el.style.color='#fdcb6e';
+      el.style.opacity=(.6+Math.random()*.4).toFixed(2);
+      el.style.textShadow=`0 0 ${5+Math.random()*12}px #fdcb6e`;break;
+    case 'highlighter':
+      el.textContent=cap.text;el.style.background='linear-gradient(transparent 55%,#fdcb6e55 55%)';break;
+    case 'blur':
+      el.textContent=cap.text;el.style.filter=`blur(${Math.max(0,(1-p*2.5))*6}px)`;break;
+    case 'rainbow':
+      el.textContent=cap.text;
+      const hue=((elapsed*120)%360)|0;el.style.color=`hsl(${hue},80%,65%)`;break;
+    case 'scale':
+      el.textContent=cap.text;el.style.transform=`scale(${.85+Math.sin(p*Math.PI)*.3})`;break;
+    case 'spotlight':{
+      const pct=Math.min(p*200,200);el.textContent=cap.text;
+      el.style.background=`linear-gradient(90deg,transparent 0%,${color} 50%,transparent 100%)`;
+      el.style.backgroundSize='200%';el.style.backgroundPosition=pct+'% center';
+      el.style.webkitBackgroundClip='text';el.style.webkitTextFillColor='transparent';break;}
   }
+}
+
+// ─── Feature Tabs ───
+function buildFeatures(){
+  const tabs=[
+    {id:'styles',n:'🎬 14 Styles',html:()=>`<div class="grid3">${STYLES.map(s=>`<div class="card"><h3>${s.n}</h3><p>Style ID: <code>${s.id}</code></p></div>`).join('')}</div>`},
+    {id:'providers',n:'🎤 STT Providers',html:()=>`<div class="grid3">${PROVIDERS.map(p=>`<div class="card"><h3>${p.icon} ${p.n}</h3><p>${p.d}</p></div>`).join('')}</div>`},
+    {id:'presets',n:'🎨 24 Presets',html:()=>`<div class="grid3">${PRESETS.map(g=>`<div class="card"><h3>${g.c}</h3><ul>${g.items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}</div>`},
+    {id:'exports',n:'📦 7 Export Formats',html:()=>`<div class="grid3">${EXPORTS.map(e=>`<div class="card"><h3>${e.n}</h3><p>${e.d}</p></div>`).join('')}</div>`},
+    {id:'sync',n:'🎵 Audio Sync',html:()=>`<div class="grid3"><div class="card"><h3>analyzeAudio()</h3><p>Extract beats, volume, energy from any audio file</p></div><div class="card"><h3>useBeatPulse()</h3><p>React hook that pulses on every detected beat</p></div><div class="card"><h3>useVolume()</h3><p>Real-time volume level as a 0–1 value per frame</p></div><div class="card"><h3>useEnergy()</h3><p>Frequency band energy analysis per frame</p></div><div class="card"><h3>useTimelineValue()</h3><p>Interpolate any value along the timeline</p></div><div class="card"><h3>fadeInOut()</h3><p>Generate smooth fade-in/fade-out curves</p></div></div>`},
+    {id:'templates',n:'📐 Templates',html:()=>`<div class="code"><span class="cm">// Data-driven video generation</span>
+<span class="kw">import</span> { VideoTemplate, buildTemplate } <span class="kw">from</span> <span class="str">'remotion-captioneer'</span>;
+
+<span class="kw">const</span> template = buildTemplate({
+  scenes: [
+    { type: <span class="str">'intro'</span>, title: <span class="str">'My Video'</span>, duration: 3 },
+    { type: <span class="str">'caption'</span>, text: <span class="str">'Hello World'</span>, style: <span class="str">'karaoke'</span> },
+    { type: <span class="str">'outro'</span>, text: <span class="str">'Thanks!'</span>, duration: 2 }
+  ]
+});</div>`},
+    {id:'layouts',n:'📏 Layouts',html:()=>`<div class="grid3"><div class="card"><h3>Container</h3><p>Full-frame wrapper with safe area padding</p></div><div class="card"><h3>Stack / Row</h3><p>Vertical and horizontal flex layouts</p></div><div class="card"><h3>Grid / Columns</h3><p>Responsive grid and multi-column layouts</p></div><div class="card"><h3>Center / Positioned</h3><p>Absolute positioning helpers</p></div><div class="card"><h3>Overlay / GradientBg</h3><p>Layered backgrounds and overlays</p></div><div class="card"><h3>FadeIn / SlideUp</h3><p>Animated entrance primitives</p></div></div>`},
+    {id:'emoji',n:'😀 Emoji Reactions',html:()=>`<div class="code"><span class="kw">import</span> { autoGenerateReactions } <span class="kw">from</span> <span class="str">'remotion-captioneer'</span>;
+
+<span class="kw">const</span> captions = [
+  { text: <span class="str">"This is amazing!"</span>, start: 0, end: 2 }
+];
+<span class="kw">const</span> reactions = autoGenerateReactions(captions);
+<span class="cm">// → [{ emoji: "😍", frame: 0 }, { emoji: "🔥", frame: 15 }]</span></div>
+<p style="color:var(--tx2);font-size:12px;margin-top:8px;text-align:center">60+ keyword → emoji mappings · Fully customizable · Zero config</p>`},
+    {id:'cli',n:'🖥 CLI',html:()=>`<table class="cli-tbl"><tr><th>Command</th><th>Description</th></tr>
+<tr><td><code>npx captioneer init &lt;name&gt;</code></td><td>Scaffold new project</td></tr>
+<tr><td><code>npx captioneer process audio.mp3</code></td><td>Transcribe with STT</td></tr>
+<tr><td><code>npx captioneer batch ./dir</code></td><td>Batch process files</td></tr>
+<tr><td><code>npx captioneer export caps.json --format srt</code></td><td>Export captions</td></tr>
+<tr><td><code>npx captioneer preview</code></td><td>Live preview server</td></tr>
+<tr><td><code>npx captioneer presets</code></td><td>List all presets</td></tr>
+<tr><td><code>npx captioneer providers</code></td><td>List STT providers</td></tr>
+<tr><td><code>npx captioneer styles</code></td><td>List caption styles</td></tr>
+<tr><td><code>npx captioneer demo</code></td><td>Generate demo video</td></tr>
+<tr><td><code>npx captioneer info</code></td><td>System &amp; config info</td></tr>
+</table>`},
+    {id:'install',n:'⚡ Quick Start',html:()=>`<div class="code"><span class="cm"># 1. Create a new project</span>
+npx captioneer init my-video
+cd my-video
+
+<span class="cm"># 2. Process audio with Groq (free &amp; fast)</span>
+npx captioneer process audio.mp3 --provider groq
+
+<span class="cm"># 3. Preview in browser</span>
+npx captioneer preview
+
+<span class="cm"># 4. Export captions</span>
+npx captioneer export captions.json --format srt</div>`}
+  ];
+
+  const tabC=document.getElementById('ftabs');
+  const panC=document.getElementById('fpanels');
+  tabs.forEach((t,i)=>{
+    const tb=document.createElement('button');tb.className='tab'+(i===0?' on':'');
+    tb.textContent=t.n;tb.onclick=()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+      document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('on'));
+      tb.classList.add('on');document.getElementById('fp-'+t.id).classList.add('on');
+    };
+    tabC.appendChild(tb);
+    const pn=document.createElement('div');pn.className='tab-panel'+(i===0?' on':'');
+    pn.id='fp-'+t.id;pn.innerHTML=t.html();panC.appendChild(pn);
+  });
+}
+
+// ─── Export ───
+function setupExp(){
+  document.querySelectorAll('.xb').forEach(b=>b.onclick=()=>exportCaps(b.dataset.f));
+}
+function exportCaps(f){
+  if(!S.caps.length)return toast('Play the demo first');
+  let txt='';
+  if(f==='srt')txt=S.caps.map((c,i)=>`${i+1}\n${fs(c.start)} --> ${fs(c.end)}\n${c.text}\n`).join('\n');
+  else if(f==='vtt')txt='WEBVTT\n\n'+S.caps.map((c,i)=>`${i+1}\n${fs(c.start)} --> ${fs(c.end)}\n${c.text}\n`).join('\n');
+  else if(f==='ass')txt='[Script Info]\nScriptType: v4.00+\n\n[Events]\nFormat: Layer, Start, End, Style, Text\n'+S.caps.map(c=>`Dialogue: 0,${fa(c.start)},${fa(c.end)},Default,${c.text}`).join('\n');
+  else txt=JSON.stringify(S.caps,null,2);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download='captions.'+f;a.click();toast('Exported '+f.toUpperCase());
+}
+function fs(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=Math.floor(s%60),ms=Math.floor((s%1)*1000);return `${p(h)}:${p(m)}:${p(sc)},${String(ms).padStart(3,'0')}`}
+function fa(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=Math.floor(s%60),cs=Math.floor((s%1)*100);return `${p(h)}:${p(m)}:${p(sc)}.${String(cs).padStart(2,'0')}`}
+function p(n){return String(n).padStart(2,'0')}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
 </script>
 </body>
 </html>
