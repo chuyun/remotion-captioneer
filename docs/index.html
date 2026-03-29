@@ -1,1023 +1,780 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>remotion-captioneer — Animated Captions for Remotion</title>
-  <meta name="description" content="Drop-in animated captions for Remotion. Audio to word-level synced subtitle components.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remotion Captioneer — Interactive Demo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a28;--border:#2a2a3a;
+  --text:#e8e8f0;--text2:#8888a0;--accent:#6c5ce7;--accent2:#a29bfe;
+  --green:#00cec9;--red:#ff6b6b;--orange:#fdcb6e;
+  --radius:12px;--font:'Inter',system-ui,-apple-system,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent2);text-decoration:none}
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
 
-    :root {
-      --bg: #0a0a0a;
-      --surface: #111;
-      --border: #222;
-      --text: #e0e0e0;
-      --muted: #888;
-      --accent-gold: #FFD700;
-      --accent-red: #FF6B6B;
-      --accent-green: #00FF88;
-      --accent-pink: #FF4081;
-      --gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-    }
+/* Hero */
+.hero{text-align:center;padding:60px 20px 40px;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(108,92,231,.15) 0%,transparent 70%);pointer-events:none}
+.badge{display:inline-block;padding:4px 14px;border-radius:20px;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);color:var(--accent2);font-size:13px;margin-bottom:16px}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;background:linear-gradient(135deg,#e8e8f0 0%,#a29bfe 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.hero p{color:var(--text2);font-size:clamp(1rem,2vw,1.15rem);max-width:600px;margin:0 auto 30px}
+.hero-links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent)}
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
+/* Demo Section */
+.demo-section{padding:40px 0}
+.demo-grid{display:grid;grid-template-columns:1fr 340px;gap:24px}
+@media(max-width:900px){.demo-grid{grid-template-columns:1fr}}
 
-    /* ─── Hero ─── */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 2rem;
-      background: var(--gradient);
-      position: relative;
-      overflow: hidden;
-    }
+/* Preview */
+.preview-container{background:#000;border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:16/9;max-height:500px}
+.preview-area{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;padding:40px 30px;position:relative;background:linear-gradient(180deg,#111 0%,#0a0a0a 100%)}
+.preview-area video,.preview-area audio{display:none}
 
-    .hero::before {
-      content: '';
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
+/* Caption rendering area */
+.caption-display{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none}
+.caption-text{font-size:clamp(1.2rem,3vw,2.2rem);font-weight:700;text-align:center;max-width:90%;word-wrap:break-word;transition:all .15s}
 
-    .badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-      backdrop-filter: blur(8px);
-    }
+/* Upload overlay */
+.upload-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.8);border:2px dashed var(--border);border-radius:var(--radius);cursor:pointer;transition:all .3s;z-index:10}
+.upload-overlay:hover,.upload-overlay.drag-over{border-color:var(--accent);background:rgba(108,92,231,.1)}
+.upload-overlay.hidden{display:none}
+.upload-icon{font-size:48px;margin-bottom:12px}
+.upload-overlay p{color:var(--text2);font-size:14px}
+.upload-overlay .or{color:var(--text2);margin:8px 0;font-size:13px}
 
-    .badge span { color: var(--accent-gold); }
+/* Controls */
+.controls-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-top:1px solid var(--border)}
+.play-btn{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.play-btn:hover{background:var(--accent2)}
+.progress-bar{flex:1;height:4px;background:var(--surface2);border-radius:2px;cursor:pointer;position:relative}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .1s linear}
+.time-display{font-size:12px;color:var(--text2);min-width:70px;text-align:right}
+.demo-btn{padding:6px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap}
+.demo-btn:hover{border-color:var(--accent)}
 
-    h1 {
-      font-size: clamp(2.5rem, 6vw, 5rem);
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, #fff 30%, var(--accent-gold));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+/* Waveform */
+.waveform-container{height:80px;background:var(--surface);border-top:1px solid var(--border);position:relative}
+.waveform-container canvas{width:100%;height:100%}
 
-    .hero p {
-      font-size: 1.25rem;
-      color: var(--muted);
-      max-width: 600px;
-      margin-bottom: 2rem;
-    }
+/* Sidebar */
+.sidebar{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.panel-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:12px}
 
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+/* Style selector */
+.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.style-btn{padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;cursor:pointer;text-align:center;transition:all .15s}
+.style-btn:hover{border-color:var(--accent)}
+.style-btn.active{background:rgba(108,92,231,.2);border-color:var(--accent);color:var(--accent2)}
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
+/* Customization */
+.custom-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.custom-row label{font-size:13px;color:var(--text2);min-width:60px}
+.custom-row input[type="color"]{width:32px;height:28px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;padding:0}
+.custom-row input[type="range"]{flex:1;accent-color:var(--accent)}
+.custom-row .val{font-size:12px;color:var(--text2);min-width:30px;text-align:right}
+select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px;width:100%}
 
-    .btn-primary {
-      background: var(--accent-gold);
-      color: #000;
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.3); }
+/* Export */
+.export-btns{display:flex;gap:8px;flex-wrap:wrap}
+.export-btn{padding:8px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.export-btn:hover{border-color:var(--green);color:var(--green)}
 
-    .btn-secondary {
-      background: #1a1a2e;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { border-color: var(--accent-gold); }
+/* Caption data display */
+.caption-data{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-top:24px;padding:20px;max-height:300px;overflow:auto}
+.caption-data h3{font-size:14px;color:var(--text2);margin-bottom:12px}
+.caption-data pre{font-size:12px;color:var(--green);white-space:pre-wrap;word-break:break-all}
 
-    /* ─── Install Bar ─── */
-    .install-bar {
-      margin-top: 3rem;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.95rem;
-    }
+/* Style Showcase */
+.showcase{padding:60px 0}
+.showcase h2{text-align:center;font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
+.showcase .sub{text-align:center;color:var(--text2);margin-bottom:40px}
+.showcase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.showcase-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s}
+.showcase-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card-preview{height:120px;display:flex;align-items:center;justify-content:center;padding:16px;font-size:18px;font-weight:700;text-align:center;background:#000}
+.card-info{padding:12px 16px}
+.card-info h4{font-size:14px;margin-bottom:2px}
+.card-info p{font-size:12px;color:var(--text2)}
 
-    .install-bar code { color: var(--accent-green); }
-    .install-bar .dollar { color: var(--muted); }
+/* Features */
+.features{padding:60px 0}
+.features h2{text-align:center;font-size:clamp(1.5rem,3vw,2rem);margin-bottom:40px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
+.feature{padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.feature h3{font-size:16px;margin-bottom:8px}
+.feature p{font-size:14px;color:var(--text2)}
 
-    .copy-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.2s;
-    }
-    .copy-btn:hover { color: #fff; border-color: var(--accent-gold); }
+/* Install */
+.install-section{padding:60px 0;text-align:center}
+.install-section h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:16px}
+.install-cmd{display:inline-block;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 32px;font-family:monospace;font-size:16px;color:var(--green);cursor:pointer;position:relative;margin-top:12px}
+.install-cmd:hover{border-color:var(--accent)}
+.copy-hint{font-size:12px;color:var(--text2);margin-top:8px}
 
-    /* ─── Features ─── */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 4rem 2rem;
-    }
+/* Footer */
+footer{text-align:center;padding:40px 20px;border-top:1px solid var(--border);color:var(--text2);font-size:13px}
+footer a{margin:0 8px}
 
-    .feature {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      transition: border-color 0.3s;
-    }
-    .feature:hover { border-color: var(--accent-gold); }
-    .feature h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
-    .feature .icon { font-size: 1.8rem; margin-bottom: 1rem; }
-    .feature p { color: var(--muted); font-size: 0.95rem; }
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
 
-    /* ─── Style Demos ─── */
-    .styles-section {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 4rem 2rem;
-    }
-
-    .styles-section h2 {
-      text-align: center;
-      font-size: 2.5rem;
-      font-weight: 900;
-      margin-bottom: 3rem;
-    }
-
-    .style-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-      gap: 2rem;
-    }
-
-    .style-card {
-      background: var(--gradient);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2.5rem 2rem;
-      position: relative;
-      overflow: hidden;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-
-    .style-label {
-      position: absolute;
-      top: 16px;
-      left: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.25);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .caption-line {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 10px;
-      justify-content: center;
-      align-items: baseline;
-    }
-
-    .word {
-      font-size: 1.8rem;
-      font-weight: 700;
-      display: inline-block;
-    }
-
-    /* Word Highlight */
-    .wh-word { color: rgba(255,255,255,0.35); }
-    .wh-word.active { color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,215,0,0.4); animation: popIn 0.3s ease; }
-
-    @keyframes popIn {
-      0% { transform: scale(1.3); }
-      100% { transform: scale(1); }
-    }
-
-    /* Karaoke */
-    .kj-word { color: rgba(255,255,255,0.3); }
-    .kj-word.filled { color: var(--accent-red); }
-    .kj-word.filling {
-      background: linear-gradient(90deg, var(--accent-red) 50%, rgba(255,255,255,0.3) 50%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: karaokeFill 0.6s ease forwards;
-    }
-
-    @keyframes karaokeFill {
-      0% { background: linear-gradient(90deg, var(--accent-red) 0%, rgba(255,255,255,0.3) 0%); -webkit-background-clip: text; }
-      100% { background: linear-gradient(90deg, var(--accent-red) 100%, rgba(255,255,255,0.3) 100%); -webkit-background-clip: text; }
-    }
-
-    /* Typewriter */
-    .tw-container {
-      background: rgba(0,0,0,0.5);
-      border: 2px solid rgba(0,255,136,0.2);
-      border-radius: 12px;
-      padding: 16px 24px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .tw-text { color: #fff; font-size: 1.5rem; font-weight: 500; }
-    .tw-cursor {
-      display: inline-block;
-      color: var(--accent-green);
-      font-weight: 400;
-      animation: blink 1s step-end infinite;
-    }
-    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
-
-    /* Bounce */
-    .bn-word { color: rgba(255,255,255,0.4); }
-    .bn-word.active {
-      color: var(--accent-pink);
-      animation: bounce 0.5s ease;
-      text-shadow: 0 4px 15px rgba(255,64,129,0.4);
-    }
-
-    @keyframes bounce {
-      0% { transform: translateY(0); }
-      30% { transform: translateY(-20px); }
-      50% { transform: translateY(-5px); }
-      70% { transform: translateY(-10px); }
-      100% { transform: translateY(0); }
-    }
-
-    /* Flicker */
-    .fl-word { color: rgba(255,255,255,0.25); }
-    .fl-word.active {
-      color: #FF9500;
-      text-shadow: 0 0 10px #FF9500, 0 0 20px #FF950060;
-      animation: flickerAnim 0.4s ease infinite;
-    }
-
-    @keyframes flickerAnim {
-      0% { opacity: 1; }
-      20% { opacity: 0.2; }
-      40% { opacity: 1; }
-      50% { opacity: 0.3; }
-      60% { opacity: 1; }
-      80% { opacity: 1; }
-      100% { opacity: 0.2; }
-    }
-
-    /* Highlighter */
-    .hl-word { color: rgba(255,255,255,0.4); }
-    .hl-word.active {
-      color: #000;
-      background: #FFEB3B;
-      padding: 2px 8px;
-      border-radius: 4px;
-      transform: rotate(-1deg);
-    }
-
-    /* Blur */
-    .bl-word { color: rgba(255,255,255,0.3); transition: filter 0.3s, opacity 0.3s; }
-    .bl-word.active { color: #fff; filter: blur(0); opacity: 1; }
-    .bl-word.future { filter: blur(6px); opacity: 0.3; }
-    .bl-word.past { filter: blur(0); opacity: 0.9; color: white; }
-
-    /* Rainbow */
-    .rb-word { color: rgba(255,255,255,0.35); }
-    .rb-word.active {
-      animation: rainbowCycle 2s linear infinite;
-    }
-
-    @keyframes rainbowCycle {
-      0% { color: #ff0000; text-shadow: 0 0 10px #ff000060; }
-      17% { color: #ff8800; text-shadow: 0 0 10px #ff880060; }
-      33% { color: #ffff00; text-shadow: 0 0 10px #ffff0060; }
-      50% { color: #00ff00; text-shadow: 0 0 10px #00ff0060; }
-      67% { color: #0088ff; text-shadow: 0 0 10px #0088ff60; }
-      83% { color: #8800ff; text-shadow: 0 0 10px #8800ff60; }
-      100% { color: #ff0000; text-shadow: 0 0 10px #ff000060; }
-    }
-
-    /* Scale */
-    .sc-word { color: rgba(255,255,255,0.3); transition: transform 0.2s; }
-    .sc-word.active {
-      color: #34D399;
-      transform: scale(1.3);
-      text-shadow: 0 0 15px #34D39960;
-    }
-
-    /* Spotlight */
-    .slt-word { color: rgba(255,255,255,0.3); }
-    .slt-word.active {
-      color: #000;
-      background: radial-gradient(ellipse at center, #FBBF24 0%, #FBBF24CC 40%, #FBBF2440 70%, transparent 100%);
-      padding: 4px 16px;
-      border-radius: 8px;
-      box-shadow: 0 0 30px #FBBF2480, 0 0 60px #FBBF2440;
-    }
-
-    /* Wave */
-    .wv-word { color: rgba(255,255,255,0.35); }
-    .wv-word.active { color: #00D4FF; text-shadow: 0 0 15px rgba(0,212,255,0.4); }
-    .wv-word.wave-up { animation: waveUp 0.4s ease; }
-
-    @keyframes waveUp {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-18px); }
-      100% { transform: translateY(0); }
-    }
-
-    /* Glow */
-    .gl-word { color: rgba(255,255,255,0.3); }
-    .gl-word.active {
-      color: #fff;
-      text-shadow: 0 0 15px #A855F7, 0 0 30px #A855F780, 0 0 45px #A855F740;
-      animation: glowPulse 1s ease infinite;
-    }
-
-    @keyframes glowPulse {
-      0%, 100% { text-shadow: 0 0 15px #A855F7, 0 0 30px #A855F780; }
-      50% { text-shadow: 0 0 25px #A855F7, 0 0 50px #A855F780, 0 0 75px #A855F740; }
-    }
-
-    /* Typewriter Erase */
-    .te-text { color: #fff; }
-    .te-erase { color: #FF4444; }
-
-    /* Pill */
-    .pl-word { color: rgba(255,255,255,0.4); }
-    .pl-word.active {
-      color: #fff;
-      background: #6366F1;
-      padding: 4px 12px;
-      border-radius: 999px;
-      animation: pillPop 0.3s ease;
-    }
-
-    @keyframes pillPop {
-      0% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-
-    /* ─── Code Example ─── */
-    .code-section {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 4rem 2rem;
-    }
-
-    .code-section h2 {
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 900;
-      margin-bottom: 2rem;
-    }
-
-    .code-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      overflow-x: auto;
-    }
-
-    .code-block pre {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      line-height: 1.7;
-    }
-
-    .code-block .kw { color: #c792ea; }
-    .code-block .fn { color: #82aaff; }
-    .code-block .str { color: #c3e88d; }
-    .code-block .cm { color: #546e7a; }
-    .code-block .tag { color: #f07178; }
-    .code-block .attr { color: #ffcb6b; }
-    .code-block .val { color: #89ddff; }
-
-    /* ─── Footer ─── */
-    footer {
-      text-align: center;
-      padding: 3rem 2rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-      border-top: 1px solid var(--border);
-    }
-
-    footer a {
-      color: var(--accent-gold);
-      text-decoration: none;
-    }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 600px) {
-      .style-grid { grid-template-columns: 1fr; }
-      .word { font-size: 1.3rem; }
-      .install-bar { flex-direction: column; text-align: center; }
-    }
-  </style>
+/* Style-specific animations */
+@keyframes glow-pulse{0%,100%{text-shadow:0 0 10px var(--accent),0 0 20px var(--accent)}50%{text-shadow:0 0 20px var(--accent),0 0 40px var(--accent),0 0 60px var(--accent)}}
+@keyframes wave-anim{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+@keyframes bounce-anim{0%,100%{transform:scaleY(1)}30%{transform:scaleY(1.3)}60%{transform:scaleY(0.9)}}
+@keyframes flicker-anim{0%,100%{opacity:1}10%{opacity:.8}20%{opacity:1}40%{opacity:.6}50%{opacity:1}70%{opacity:.8}80%{opacity:1}}
+@keyframes typewriter-blink{0%,100%{border-color:var(--accent)}50%{border-color:transparent}}
+@keyframes rainbow-shift{0%{color:#ff6b6b}16%{color:#fdcb6e}33%{color:#00cec9}50%{color:#6c5ce7}66%{color:#a29bfe}83%{color:#fd79a8}100%{color:#ff6b6b}}
+@keyframes scale-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes spotlight-sweep{0%{background-position:-200% center}100%{background-position:200% center}}
+</style>
 </head>
 <body>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="badge">🎬 Built with <span>Remotion</span></div>
-    <h1>remotion-captioneer</h1>
-    <p>Drop-in animated captions for Remotion. Feed it audio. Get word-level synced, beautifully animated subtitles.</p>
-    <div class="hero-actions">
-      <a href="https://github.com/neutral-Stage/remotion-captioneer" class="btn btn-primary">⭐ Star on GitHub</a>
-      <a href="https://github.com/neutral-Stage/remotion-captioneer#readme" class="btn btn-secondary">📖 Documentation</a>
-    </div>
-    <div class="install-bar">
-      <span class="dollar">$</span>
-      <code>npm install remotion-captioneer</code>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText('npm install remotion-captioneer')">Copy</button>
-    </div>
-  </section>
+<!-- Hero -->
+<section class="hero">
+  <div class="badge">🎬 Open Source Caption Toolkit</div>
+  <h1>Remotion Captioneer</h1>
+  <p>14 animated caption styles, 5 STT providers, audio-video sync, templates &amp; exports — for React video.</p>
+  <div class="hero-links">
+    <a href="https://github.com/neutral-Stage/remotion-captioneer" target="_blank" class="btn btn-primary">⭐ GitHub</a>
+    <a href="https://www.npmjs.com/package/remotion-captioneer" target="_blank" class="btn btn-secondary">📦 npm</a>
+    <a href="#demo" class="btn btn-secondary">▶ Try Demo</a>
+  </div>
+</section>
 
-  <!-- Features -->
-  <div class="features">
-    <div class="feature">
-      <div class="icon">🎙️</div>
-      <h3>Audio → Captions</h3>
-      <p>Powered by whisper.cpp for offline, word-level transcription with millisecond timestamps.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">🎨</div>
-      <h3>4 Caption Styles</h3>
-      <p>Word Highlight, Karaoke, Typewriter, and Bounce — all drop-in ready.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">⚡</div>
-      <h3>CLI Included</h3>
-      <p><code>npx captioneer process audio.mp4</code> — one command to generate captions.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">📦</div>
-      <h3>Zero Config</h3>
-      <p>Sensible defaults out of the box. Customize everything when you need to.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">🔷</div>
-      <h3>Full TypeScript</h3>
-      <p>Complete type definitions. Your IDE will thank you.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">🐳</div>
-      <h3>Docker Ready</h3>
-      <p>Deploy rendering at scale with containerized pipelines.</p>
+<!-- Interactive Demo -->
+<section class="demo-section" id="demo">
+  <div class="container">
+    <div class="demo-grid">
+      <!-- Preview -->
+      <div>
+        <div class="preview-container" id="previewContainer">
+          <div class="upload-overlay" id="uploadOverlay">
+            <div class="upload-icon">🎵</div>
+            <p>Drag &amp; drop audio or click to upload</p>
+            <div class="or">— or —</div>
+            <button class="demo-btn" id="useDemoBtn" style="margin-top:4px;padding:8px 20px;font-size:13px">▶ Use Demo Captions</button>
+            <input type="file" id="audioInput" accept="audio/*" style="display:none">
+          </div>
+          <div class="preview-area" id="previewArea">
+            <div class="caption-display">
+              <div class="caption-text" id="captionText"></div>
+            </div>
+          </div>
+          <div class="controls-bar">
+            <button class="play-btn" id="playBtn" title="Play/Pause">▶</button>
+            <div class="progress-bar" id="progressBar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+          </div>
+          <div class="waveform-container">
+            <canvas id="waveformCanvas"></canvas>
+          </div>
+        </div>
+        <!-- Caption data -->
+        <div class="caption-data" id="captionDataPanel" style="display:none">
+          <h3>📋 Caption Data <span style="float:right;cursor:pointer" id="closeCaptionData">✕</span></h3>
+          <pre id="captionDataPre"></pre>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Style Selector -->
+        <div class="panel">
+          <div class="panel-title">Caption Style</div>
+          <div class="style-grid" id="styleGrid"></div>
+        </div>
+
+        <!-- Customization -->
+        <div class="panel">
+          <div class="panel-title">Customize</div>
+          <div class="custom-row">
+            <label>Color</label>
+            <input type="color" id="captionColor" value="#ffffff">
+          </div>
+          <div class="custom-row">
+            <label>Bg</label>
+            <input type="color" id="captionBg" value="#6c5ce7">
+          </div>
+          <div class="custom-row">
+            <label>Size</label>
+            <input type="range" id="captionSize" min="16" max="48" value="28">
+            <span class="val" id="captionSizeVal">28</span>
+          </div>
+          <div class="custom-row">
+            <label>Font</label>
+            <select id="captionFont">
+              <option value="'Inter',sans-serif">Inter</option>
+              <option value="monospace">Monospace</option>
+              <option value="'Georgia',serif">Georgia</option>
+              <option value="'Impact',sans-serif">Impact</option>
+              <option value="'Comic Sans MS',cursive">Comic Sans</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Export -->
+        <div class="panel">
+          <div class="panel-title">Export</div>
+          <div class="export-btns">
+            <button class="export-btn" data-format="srt">SRT</button>
+            <button class="export-btn" data-format="vtt">VTT</button>
+            <button class="export-btn" data-format="ass">ASS</button>
+            <button class="export-btn" data-format="json">JSON</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+</section>
 
-  <!-- Style Demos -->
-  <section class="styles-section">
-    <h2>Caption Styles</h2>
-    <div class="style-grid">
+<!-- Style Showcase -->
+<section class="showcase">
+  <div class="container">
+    <h2>14 Caption Styles</h2>
+    <p class="sub">Click any style to preview it in the demo above</p>
+    <div class="showcase-grid" id="showcaseGrid"></div>
+  </div>
+</section>
 
-      <!-- Word Highlight -->
-      <div class="style-card">
-        <div class="style-label">word-highlight</div>
-        <div class="caption-line" id="demo-wh"></div>
-      </div>
-
-      <!-- Karaoke -->
-      <div class="style-card">
-        <div class="style-label">karaoke</div>
-        <div class="caption-line" id="demo-kj"></div>
-      </div>
-
-      <!-- Typewriter -->
-      <div class="style-card">
-        <div class="style-label">typewriter</div>
-        <div class="tw-container">
-          <span class="tw-text" id="demo-tw"></span><span class="tw-cursor">|</span>
-        </div>
-      </div>
-
-      <!-- Bounce -->
-      <div class="style-card">
-        <div class="style-label">bounce</div>
-        <div class="caption-line" id="demo-bn"></div>
-      </div>
-
-      <!-- Flicker -->
-      <div class="style-card">
-        <div class="style-label">flicker</div>
-        <div class="caption-line" id="demo-fl"></div>
-      </div>
-
-      <!-- Highlighter -->
-      <div class="style-card">
-        <div class="style-label">highlighter</div>
-        <div class="caption-line" id="demo-hl"></div>
-      </div>
-
+<!-- Features -->
+<section class="features">
+  <div class="container">
+    <h2>Everything You Need</h2>
+    <div class="features-grid">
+      <div class="feature"><h3>🎬 14 Caption Styles</h3><p>Word-highlight, karaoke, typewriter, bounce, wave, glow, pill, flicker, rainbow, scale, spotlight, and more.</p></div>
+      <div class="feature"><h3>🎤 5 STT Providers</h3><p>Local whisper.cpp, OpenAI, Groq, Deepgram, AssemblyAI — pick your speed vs accuracy tradeoff.</p></div>
+      <div class="feature"><h3>🎵 Audio-Video Sync</h3><p>Beat detection, volume hooks, energy analysis, timeline interpolation — all frame-accurate.</p></div>
+      <div class="feature"><h3>📦 7 Export Formats</h3><p>SRT, VTT, ASS, TXT, word-level SRT &amp; VTT, plus @remotion/captions compatibility.</p></div>
+      <div class="feature"><h3>🎨 24 Presets</h3><p>Social, Podcast, Cinematic, Music, Tutorial, Minimal, Gaming, News, Education, Fun — ready to use.</p></div>
+      <div class="feature"><h3>📐 Layout Primitives</h3><p>Container, Stack, Grid, Columns, Positioned, Overlay, GradientBg, FadeIn, SlideUp, Center.</p></div>
+      <div class="feature"><h3>😀 Emoji Reactions</h3><p>Auto-generate emoji reactions from captions with 60+ keyword→emoji mappings.</p></div>
+      <div class="feature"><h3>🖥 CLI &amp; Preview</h3><p>10 CLI commands, live preview server, project scaffolder with <code>npx captioneer init</code>.</p></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- More Styles -->
-  <section class="styles-section">
-    <h2>More Styles</h2>
-    <div class="style-grid">
+<!-- Install -->
+<section class="install-section">
+  <div class="container">
+    <h2>Get Started</h2>
+    <div class="install-cmd" id="installCmd">npx captioneer init my-video</div>
+    <div class="copy-hint">Click to copy</div>
+  </div>
+</section>
 
-      <!-- Wave -->
-      <div class="style-card">
-        <div class="style-label">wave</div>
-        <div class="caption-line" id="demo-wv"></div>
-      </div>
+<footer>
+  <p>
+    <a href="https://github.com/neutral-Stage/remotion-captioneer">GitHub</a> ·
+    <a href="https://www.npmjs.com/package/remotion-captioneer">npm</a> ·
+    <a href="https://github.com/neutral-Stage/remotion-captioneer/issues">Issues</a> ·
+    MIT License
+  </p>
+</footer>
 
-      <!-- Glow -->
-      <div class="style-card">
-        <div class="style-label">glow</div>
-        <div class="caption-line" id="demo-gl"></div>
-      </div>
+<div class="toast" id="toast"></div>
 
-      <!-- Typewriter Erase -->
-      <div class="style-card">
-        <div class="style-label">typewriter-erase</div>
-        <div class="tw-container">
-          <span class="tw-text" id="demo-te"></span><span class="tw-cursor">|</span>
-        </div>
-      </div>
+<script>
+// ─── State ───
+const STYLES = [
+  {id:'word-highlight',name:'Word Highlight',desc:'Current word pops with color'},
+  {id:'karaoke',name:'Karaoke',desc:'Fill color sweeps across words'},
+  {id:'typewriter',name:'Typewriter',desc:'Characters appear one by one'},
+  {id:'typewriter-erase',name:'Type & Erase',desc:'Type in then erase before next'},
+  {id:'bounce',name:'Bounce',desc:'Words bounce in with spring physics'},
+  {id:'wave',name:'Wave',desc:'Words wave up and down'},
+  {id:'glow',name:'Glow',desc:'Neon glow pulsing effect'},
+  {id:'pill',name:'Pill',desc:'Rounded pill-shaped background'},
+  {id:'flicker',name:'Flicker',desc:'Flickering neon sign effect'},
+  {id:'highlighter',name:'Highlighter',desc:'Yellow marker highlight sweep'},
+  {id:'blur',name:'Blur',desc:'Blur in/out reveal'},
+  {id:'rainbow',name:'Rainbow',desc:'Cycling rainbow colors'},
+  {id:'scale',name:'Scale',desc:'Words scale up on emphasis'},
+  {id:'spotlight',name:'Spotlight',desc:'Spotlight sweep reveal'}
+];
 
-      <!-- Pill -->
-      <div class="style-card">
-        <div class="style-label">pill</div>
-        <div class="caption-line" id="demo-pl"></div>
-      </div>
+let currentStyle = 'word-highlight';
+let captions = [];
+let audioCtx = null;
+let audioBuffer = null;
+let sourceNode = null;
+let analyser = null;
+let isPlaying = false;
+let startTime = 0;
+let duration = 0;
+let animFrame = null;
+let audioElement = null;
+let waveformData = null;
 
-      <!-- Blur -->
-      <div class="style-card">
-        <div class="style-label">blur</div>
-        <div class="caption-line" id="demo-bl"></div>
-      </div>
+// ─── Demo captions (simulated word-level timing) ───
+const DEMO_TEXT = "Remotion Captioneer makes it easy to add beautiful animated captions to your Remotion videos with fourteen different styles to choose from";
+const DEMO_WORDS = DEMO_TEXT.split(' ');
+const WORD_DURATION = 0.35; // seconds per word
+const DEMO_CAPTIONS = DEMO_WORDS.map((word, i) => ({
+  text: word,
+  start: i * WORD_DURATION,
+  end: (i + 1) * WORD_DURATION,
+  conf: 0.95
+}));
 
-      <!-- Rainbow -->
-      <div class="style-card">
-        <div class="style-label">rainbow</div>
-        <div class="caption-line" id="demo-rb"></div>
-      </div>
+// ─── Init ───
+function init() {
+  buildStyleGrid();
+  buildShowcase();
+  setupUpload();
+  setupControls();
+  setupExport();
+  setupCustomize();
+  setupInstallCopy();
+  document.getElementById('closeCaptionData').onclick = () => {
+    document.getElementById('captionDataPanel').style.display = 'none';
+  };
+}
 
-      <!-- Scale -->
-      <div class="style-card">
-        <div class="style-label">scale</div>
-        <div class="caption-line" id="demo-sc"></div>
-      </div>
+// ─── Style Grid ───
+function buildStyleGrid() {
+  const grid = document.getElementById('styleGrid');
+  STYLES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'style-btn' + (s.id === currentStyle ? ' active' : '');
+    btn.textContent = s.name;
+    btn.dataset.style = s.id;
+    btn.onclick = () => selectStyle(s.id);
+    grid.appendChild(btn);
+  });
+}
 
-      <!-- Spotlight -->
-      <div class="style-card">
-        <div class="style-label">spotlight</div>
-        <div class="caption-line" id="demo-slt"></div>
-      </div>
+function selectStyle(id) {
+  currentStyle = id;
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.style === id));
+}
 
-    </div>
-  </section>
+// ─── Showcase Cards ───
+function buildShowcase() {
+  const grid = document.getElementById('showcaseGrid');
+  STYLES.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'showcase-card';
+    card.onclick = () => { selectStyle(s.id); document.getElementById('demo').scrollIntoView({behavior:'smooth'}); };
+    card.innerHTML = `
+      <div class="card-preview" id="showcase-${s.id}"><span class="showcase-text">Hello World</span></div>
+      <div class="card-info"><h4>${s.name}</h4><p>${s.desc}</p></div>
+    `;
+    grid.appendChild(card);
+  });
+  animateShowcaseCards();
+}
 
-  <!-- Code Example -->
-  <section class="code-section">
-    <h2>Usage</h2>
-    <div class="code-block">
-      <pre><span class="kw">import</span> { AbsoluteFill } <span class="kw">from</span> <span class="str">"remotion"</span>;
-<span class="kw">import</span> { AnimatedCaptions } <span class="kw">from</span> <span class="str">"remotion-captioneer"</span>;
-<span class="kw">import</span> captions <span class="kw">from</span> <span class="str">"./my-captions.json"</span>;
+function animateShowcaseCards() {
+  const anims = {
+    'word-highlight': (el) => { el.style.color = '#fff'; setInterval(()=>{el.style.color = el.style.color === '#fff' ? '#6c5ce7' : '#fff';}, 1200); },
+    'karaoke': (el) => { el.style.background = 'linear-gradient(90deg,#6c5ce7 50%,#888 50%)'; el.style.backgroundSize = '200% 100%'; el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent'; setInterval(()=>{el.style.backgroundPosition = el.style.backgroundPosition === '0% 50%' ? '100% 50%' : '0% 50%';}, 1500); },
+    'typewriter': (el) => { el.style.borderRight = '2px solid #6c5ce7'; el.style.animation = 'typewriter-blink .7s infinite'; },
+    'typewriter-erase': (el) => { el.style.opacity = '1'; setInterval(()=>{el.style.opacity = el.style.opacity === '1' ? '0.2' : '1';}, 1000); },
+    'bounce': (el) => { el.style.animation = 'bounce-anim 1s ease infinite'; },
+    'wave': (el) => { el.style.animation = 'wave-anim 1.5s ease-in-out infinite'; },
+    'glow': (el) => { el.style.color = '#a29bfe'; el.style.animation = 'glow-pulse 2s ease-in-out infinite'; },
+    'pill': (el) => { el.style.background = 'rgba(108,92,231,.3)'; el.style.padding = '8px 24px'; el.style.borderRadius = '50px'; el.style.border = '1px solid rgba(108,92,231,.5)'; },
+    'flicker': (el) => { el.style.color = '#fdcb6e'; el.style.animation = 'flicker-anim 2s linear infinite'; },
+    'highlighter': (el) => { el.style.background = 'linear-gradient(transparent 60%, #fdcb6e 60%)'; el.style.display = 'inline'; },
+    'blur': (el) => { el.style.filter = 'blur(0px)'; setInterval(()=>{el.style.filter = el.style.filter === 'blur(0px)' ? 'blur(4px)' : 'blur(0px)';}, 1500); },
+    'rainbow': (el) => { el.style.animation = 'rainbow-shift 3s linear infinite'; },
+    'scale': (el) => { el.style.animation = 'scale-pulse 1.5s ease-in-out infinite'; },
+    'spotlight': (el) => { el.style.background = 'linear-gradient(90deg,transparent 0%,#fff 50%,transparent 100%)'; el.style.backgroundSize = '200% 100%'; el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent'; el.style.color = '#fff'; el.style.animation = 'spotlight-sweep 2s linear infinite'; }
+  };
+  STYLES.forEach(s => {
+    const el = document.querySelector(`#showcase-${s.id} .showcase-text`);
+    if (el && anims[s.id]) anims[s.id](el);
+  });
+}
 
-<span class="kw">export const</span> <span class="fn">MyVideo</span> = () => (
-  <span class="tag">&lt;AbsoluteFill</span> <span class="attr">style</span>=<span class="val">{{</span> background: <span class="str">"#0a0a0a"</span> <span class="val">}}</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;AnimatedCaptions</span>
-      <span class="attr">captions</span>=<span class="val">{captions}</span>
-      <span class="attr">style</span>=<span class="str">"karaoke"</span>
-      <span class="attr">highlightColor</span>=<span class="str">"#FF6B6B"</span>
-    <span class="tag">/&gt;</span>
-  <span class="tag">&lt;/AbsoluteFill&gt;</span>
-);</pre>
-    </div>
-  </section>
+// ─── Upload ───
+function setupUpload() {
+  const overlay = document.getElementById('uploadOverlay');
+  const input = document.getElementById('audioInput');
+  const demoBtn = document.getElementById('useDemoBtn');
 
-  <!-- Footer -->
-  <footer>
-    MIT License · Built by <a href="https://github.com/neutral-Stage">Shuvo Roy</a> · 
-    <a href="https://github.com/neutral-Stage/remotion-captioneer">GitHub</a>
-  </footer>
+  overlay.onclick = (e) => { if (e.target !== demoBtn) input.click(); };
+  demoBtn.onclick = (e) => { e.stopPropagation(); startDemo(); };
 
-  <!-- Demo Animations -->
-  <script>
-    const demoWords = ["Remotion", "captions", "are", "absolutely", "beautiful"];
+  input.onchange = (e) => { if (e.target.files[0]) loadAudio(e.target.files[0]); };
 
-    // Word Highlight
-    (function() {
-      const el = document.getElementById('demo-wh');
-      demoWords.forEach((w, i) => {
-        const span = document.createElement('span');
-        span.className = 'word wh-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  overlay.ondragover = (e) => { e.preventDefault(); overlay.classList.add('drag-over'); };
+  overlay.ondragleave = () => overlay.classList.remove('drag-over');
+  overlay.ondrop = (e) => { e.preventDefault(); overlay.classList.remove('drag-over'); if (e.dataTransfer.files[0]) loadAudio(e.dataTransfer.files[0]); };
+}
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.wh-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 800);
-    })();
+async function loadAudio(file) {
+  stopPlayback();
+  const overlay = document.getElementById('uploadOverlay');
+  overlay.classList.add('hidden');
 
-    // Karaoke
-    (function() {
-      const el = document.getElementById('demo-kj');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word kj-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  // Create audio element for playback
+  const url = URL.createObjectURL(file);
+  audioElement = new Audio(url);
+  audioElement.crossOrigin = 'anonymous';
+  await new Promise(r => { audioElement.onloadedmetadata = r; });
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.kj-word').forEach((s, i) => {
-          s.classList.remove('filling', 'filled');
-          if (i < idx) s.classList.add('filled');
-          if (i === idx) s.classList.add('filling');
-        });
-        idx = (idx + 1) % (demoWords.length + 1);
-        if (idx === 0) {
-          el.querySelectorAll('.kj-word').forEach(s => s.classList.remove('filling', 'filled'));
-        }
-      }, 700);
-    })();
+  duration = audioElement.duration;
 
-    // Typewriter
-    (function() {
-      const el = document.getElementById('demo-tw');
-      const fullText = demoWords.join(' ');
-      let charIdx = 0;
+  // Decode for waveform
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const arrayBuf = await file.arrayBuffer();
+  audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
+  drawWaveform(audioBuffer);
 
-      setInterval(() => {
-        if (charIdx <= fullText.length) {
-          el.textContent = fullText.slice(0, charIdx);
-          charIdx++;
-        } else {
-          setTimeout(() => { charIdx = 0; el.textContent = ''; }, 1500);
-        }
-      }, 80);
-    })();
+  // Generate simulated captions from duration
+  captions = generateSimulatedCaptions(duration);
+  showToast('Audio loaded! Press play to see captions.');
+}
 
-    // Bounce
-    (function() {
-      const el = document.getElementById('demo-bn');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word bn-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+function startDemo() {
+  stopPlayback();
+  document.getElementById('uploadOverlay').classList.add('hidden');
+  captions = DEMO_CAPTIONS;
+  duration = DEMO_CAPTIONS.length * WORD_DURATION;
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.bn-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 700);
-    })();
+  // Create synthetic waveform
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const bars = 200;
+  for (let i = 0; i < bars; i++) {
+    const h = (Math.sin(i * 0.1) * 0.3 + 0.5 + Math.random() * 0.2) * canvas.height * 0.7;
+    const x = (i / bars) * canvas.width;
+    const w = Math.max(1, canvas.width / bars - 1);
+    ctx.fillStyle = 'rgba(108,92,231,0.4)';
+    ctx.fillRect(x, (canvas.height - h) / 2, w, h);
+  }
 
-    // Flicker
-    (function() {
-      const el = document.getElementById('demo-fl');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word fl-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  // Create a synthetic audio buffer for playback
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const sr = audioCtx.sampleRate;
+  const len = Math.ceil(duration * sr);
+  audioBuffer = audioCtx.createBuffer(1, len, sr);
+  const data = audioBuffer.getChannelData(0);
+  for (let i = 0; i < len; i++) {
+    const t = i / sr;
+    // Generate a simple melody-like tone
+    const freq = 220 + Math.sin(t * 2) * 110;
+    data[i] = Math.sin(2 * Math.PI * freq * t) * 0.15 * (1 - t / duration);
+  }
+  waveformData = null;
+  showToast('Demo mode! Press play to see all 14 styles in action.');
+}
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.fl-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 800);
-    })();
+function generateSimulatedCaptions(dur) {
+  const words = "This is a simulated caption track upload your audio and connect an STT provider for real transcription support".split(' ');
+  const wDur = dur / words.length;
+  return words.map((w, i) => ({text: w, start: i * wDur, end: (i + 1) * wDur, conf: 0.9}));
+}
 
-    // Highlighter
-    (function() {
-      const el = document.getElementById('demo-hl');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word hl-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+// ─── Controls ───
+function setupControls() {
+  document.getElementById('playBtn').onclick = togglePlay;
+  document.getElementById('progressBar').onclick = seekTo;
+}
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.hl-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 750);
-    })();
+function togglePlay() {
+  if (isPlaying) stopPlayback();
+  else startPlayback();
+}
 
-    // Wave
-    (function() {
-      const el = document.getElementById('demo-wv');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word wv-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+function startPlayback() {
+  if (!audioBuffer) return;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.wv-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-          const dist = i - idx;
-          if (dist >= 0 && dist <= 3) {
-            s.style.transform = `translateY(${-15 * Math.sin((dist / 3) * Math.PI)}px)`;
-          } else {
-            s.style.transform = 'translateY(0)';
-          }
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 700);
-    })();
+  sourceNode = audioCtx.createBufferSource();
+  sourceNode.buffer = audioBuffer;
 
-    // Glow
-    (function() {
-      const el = document.getElementById('demo-gl');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word gl-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+  sourceNode.connect(analyser);
+  analyser.connect(audioCtx.destination);
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.gl-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 900);
-    })();
+  sourceNode.start(0);
+  startTime = audioCtx.currentTime;
+  isPlaying = true;
+  document.getElementById('playBtn').textContent = '⏸';
 
-    // Typewriter Erase
-    (function() {
-      const el = document.getElementById('demo-te');
-      const fullText = demoWords.join(' ');
-      let phase = 'typing';
-      let charIdx = 0;
-      let eraseIdx = fullText.length;
+  sourceNode.onended = () => { stopPlayback(); };
+  tick();
+}
 
-      setInterval(() => {
-        if (phase === 'typing') {
-          if (charIdx <= fullText.length) {
-            el.textContent = fullText.slice(0, charIdx);
-            charIdx++;
-          } else {
-            phase = 'pause';
-            setTimeout(() => { phase = 'erasing'; eraseIdx = fullText.length; }, 1000);
-          }
-        } else if (phase === 'erasing') {
-          if (eraseIdx > 0) {
-            el.textContent = fullText.slice(0, eraseIdx);
-            eraseIdx--;
-          } else {
-            phase = 'typing';
-            charIdx = 0;
-          }
-        }
-      }, 80);
-    })();
+function stopPlayback() {
+  isPlaying = false;
+  if (sourceNode) { try { sourceNode.stop(); } catch(e){} sourceNode = null; }
+  if (animFrame) cancelAnimationFrame(animFrame);
+  document.getElementById('playBtn').textContent = '▶';
+  document.getElementById('captionText').textContent = '';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('timeDisplay').textContent = '0:00 / ' + formatTime(duration);
+}
 
-    // Pill
-    (function() {
-      const el = document.getElementById('demo-pl');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word pl-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+function tick() {
+  if (!isPlaying) return;
+  const elapsed = audioCtx.currentTime - startTime;
+  const progress = Math.min(elapsed / duration, 1);
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.pl-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 800);
-    })();
+  document.getElementById('progressFill').style.width = (progress * 100) + '%';
+  document.getElementById('timeDisplay').textContent = formatTime(elapsed) + ' / ' + formatTime(duration);
 
-    // Blur
-    (function() {
-      const el = document.getElementById('demo-bl');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word bl-word future';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  // Find current caption
+  const current = captions.find(c => elapsed >= c.start && elapsed < c.end);
+  if (current) renderCaption(current, elapsed);
+  else document.getElementById('captionText').textContent = '';
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.bl-word').forEach((s, i) => {
-          s.classList.remove('active', 'past', 'future');
-          if (i === idx) s.classList.add('active');
-          else if (i < idx) s.classList.add('past');
-          else s.classList.add('future');
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 800);
-    })();
+  // Live waveform from analyser
+  if (analyser) drawLiveWaveform();
 
-    // Rainbow
-    (function() {
-      const el = document.getElementById('demo-rb');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word rb-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  animFrame = requestAnimationFrame(tick);
+}
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.rb-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 700);
-    })();
+function seekTo(e) {
+  if (!audioBuffer) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  stopPlayback();
+  // For simplicity, restart from beginning (full seek requires more complex audio handling)
+  showToast('Seeking is limited in demo mode');
+}
 
-    // Scale
-    (function() {
-      const el = document.getElementById('demo-sc');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word sc-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + String(sec).padStart(2, '0');
+}
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.sc-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 750);
-    })();
+// ─── Caption Rendering ───
+function renderCaption(cap, elapsed) {
+  const el = document.getElementById('captionText');
+  const color = document.getElementById('captionColor').value;
+  const bgColor = document.getElementById('captionBg').value;
+  const size = document.getElementById('captionSize').value;
+  const font = document.getElementById('captionFont').value;
+  const progress = (elapsed - cap.start) / (cap.end - cap.start);
 
-    // Spotlight
-    (function() {
-      const el = document.getElementById('demo-slt');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word slt-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  el.style.fontSize = size + 'px';
+  el.style.fontFamily = font;
+  el.style.color = color;
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.slt-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 850);
-    })();
+  switch (currentStyle) {
+    case 'word-highlight':
+      el.innerHTML = `<span style="color:${color}">${cap.text}</span>`;
+      el.style.textShadow = `0 0 20px ${bgColor}`;
+      break;
+    case 'karaoke': {
+      const pct = Math.min(progress * 100, 100);
+      el.innerHTML = `<span style="background:linear-gradient(90deg,${bgColor} ${pct}%,${color} ${pct}%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${cap.text}</span>`;
+      break;
+    }
+    case 'typewriter': {
+      const chars = Math.floor(progress * cap.text.length);
+      el.innerHTML = cap.text.substring(0, chars + 1) + '<span style="border-right:2px solid ' + bgColor + ';animation:typewriter-blink .7s infinite">​</span>';
+      el.style.color = color;
+      break;
+    }
+    case 'typewriter-erase': {
+      const phase = progress < 0.6 ? Math.floor((progress / 0.6) * cap.text.length) : Math.floor((1 - (progress - 0.6) / 0.4) * cap.text.length);
+      el.textContent = cap.text.substring(0, Math.max(1, phase));
+      el.style.color = color;
+      break;
+    }
+    case 'bounce':
+      el.textContent = cap.text;
+      el.style.transform = `scaleY(${1 + Math.sin(progress * Math.PI) * 0.2})`;
+      el.style.color = color;
+      el.style.textShadow = `0 0 15px ${bgColor}`;
+      break;
+    case 'wave':
+      el.textContent = cap.text;
+      el.style.transform = `translateY(${Math.sin(progress * Math.PI * 4) * 8}px)`;
+      el.style.color = color;
+      break;
+    case 'glow':
+      el.textContent = cap.text;
+      el.style.color = bgColor;
+      el.style.textShadow = `0 0 ${10 + progress * 30}px ${bgColor}, 0 0 ${20 + progress * 50}px ${bgColor}`;
+      break;
+    case 'pill':
+      el.textContent = cap.text;
+      el.style.background = bgColor + '44';
+      el.style.padding = '8px 24px';
+      el.style.borderRadius = '50px';
+      el.style.border = `1px solid ${bgColor}88`;
+      el.style.color = color;
+      break;
+    case 'flicker':
+      el.textContent = cap.text;
+      el.style.color = '#fdcb6e';
+      el.style.opacity = 0.6 + Math.random() * 0.4;
+      el.style.textShadow = `0 0 ${5 + Math.random() * 15}px #fdcb6e`;
+      break;
+    case 'highlighter':
+      el.textContent = cap.text;
+      el.style.background = `linear-gradient(transparent 55%, #fdcb6e66 55%)`;
+      el.style.color = color;
+      break;
+    case 'blur':
+      el.textContent = cap.text;
+      el.style.filter = `blur(${Math.max(0, (1 - progress * 2)) * 8}px)`;
+      el.style.color = color;
+      break;
+    case 'rainbow':
+      el.textContent = cap.text;
+      el.style.animation = 'rainbow-shift 2s linear infinite';
+      break;
+    case 'scale':
+      el.textContent = cap.text;
+      el.style.transform = `scale(${0.8 + Math.sin(progress * Math.PI) * 0.4})`;
+      el.style.color = color;
+      break;
+    case 'spotlight': {
+      const pct = Math.min(progress * 200, 200);
+      el.innerHTML = `<span style="background:linear-gradient(90deg,transparent 0%,${color} 50%,transparent 100%);background-size:200% 100%;background-position:${pct}% center;-webkit-background-clip:text;-webkit-text-fill-color:transparent">${cap.text}</span>`;
+      break;
+    }
+  }
+}
 
-    // Wave
-    (function() {
-      const el = document.getElementById('demo-wv');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word wv-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+// ─── Waveform ───
+function drawWaveform(buffer) {
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  const data = buffer.getChannelData(0);
+  const step = Math.ceil(data.length / canvas.width);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < canvas.width; i++) {
+    let min = 1, max = -1;
+    for (let j = 0; j < step; j++) {
+      const d = data[i * step + j] || 0;
+      if (d < min) min = d;
+      if (d > max) max = d;
+    }
+    const h = (max - min) * canvas.height * 0.5;
+    const y = (canvas.height - h) / 2;
+    ctx.fillStyle = 'rgba(108,92,231,0.4)';
+    ctx.fillRect(i, y, 1, Math.max(1, h));
+  }
+}
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.wv-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-          const dist = i - idx;
-          if (dist >= 0 && dist <= 3) {
-            s.style.transform = `translateY(${-15 * Math.sin((dist / 3) * Math.PI)}px)`;
-          } else {
-            s.style.transform = 'translateY(0)';
-          }
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 700);
-    })();
+function drawLiveWaveform() {
+  if (!analyser) return;
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  const bufLen = analyser.frequencyBinCount;
+  const dataArr = new Uint8Array(bufLen);
+  analyser.getByteFrequencyData(dataArr);
 
-    // Glow
-    (function() {
-      const el = document.getElementById('demo-gl');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word gl-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.gl-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 900);
-    })();
+  const barW = canvas.width / bufLen * 2.5;
+  let x = 0;
+  for (let i = 0; i < bufLen; i++) {
+    const h = (dataArr[i] / 255) * canvas.height * 0.8;
+    const r = dataArr[i] / 255;
+    ctx.fillStyle = `rgba(${108 + r * 100},${92 + r * 80},${231},${0.3 + r * 0.5})`;
+    ctx.fillRect(x, canvas.height - h, barW, h);
+    x += barW + 1;
+  }
+}
 
-    // Typewriter Erase
-    (function() {
-      const el = document.getElementById('demo-te');
-      const fullText = demoWords.join(' ');
-      let phase = 'typing';
-      let charIdx = 0;
-      let eraseIdx = fullText.length;
+// ─── Export ───
+function setupExport() {
+  document.querySelectorAll('.export-btn').forEach(btn => {
+    btn.onclick = () => exportCaptions(btn.dataset.format);
+  });
+}
 
-      setInterval(() => {
-        if (phase === 'typing') {
-          if (charIdx <= fullText.length) {
-            el.textContent = fullText.slice(0, charIdx);
-            charIdx++;
-          } else {
-            phase = 'pause';
-            setTimeout(() => { phase = 'erasing'; eraseIdx = fullText.length; }, 1000);
-          }
-        } else if (phase === 'erasing') {
-          if (eraseIdx > 0) {
-            el.textContent = fullText.slice(0, eraseIdx);
-            eraseIdx--;
-          } else {
-            phase = 'typing';
-            charIdx = 0;
-          }
-        }
-      }, 80);
-    })();
+function exportCaptions(format) {
+  if (!captions.length) { showToast('No captions to export. Load audio or use demo first.'); return; }
+  let content = '', ext = format;
 
-    // Pill
-    (function() {
-      const el = document.getElementById('demo-pl');
-      demoWords.forEach((w) => {
-        const span = document.createElement('span');
-        span.className = 'word pl-word';
-        span.textContent = w;
-        el.appendChild(span);
-      });
+  switch (format) {
+    case 'srt':
+      content = captions.map((c, i) => `${i+1}\n${fmtSRT(c.start)} --> ${fmtSRT(c.end)}\n${c.text}\n`).join('\n');
+      break;
+    case 'vtt':
+      content = 'WEBVTT\n\n' + captions.map((c, i) => `${i+1}\n${fmtVTT(c.start)} --> ${fmtVTT(c.end)}\n${c.text}\n`).join('\n');
+      break;
+    case 'ass':
+      content = '[Script Info]\nScriptType: v4.00+\nPlayResX: 1920\nPlayResY: 1080\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, Bold\nStyle: Default,Arial,72,&H00FFFFFF,-1\n\n[Events]\nFormat: Layer, Start, End, Style, Text\n' +
+        captions.map(c => `Dialogue: 0,${fmtASS(c.start)},${fmtASS(c.end)},Default,${c.text}`).join('\n');
+      break;
+    case 'json':
+      content = JSON.stringify(captions, null, 2);
+      break;
+  }
 
-      let idx = 0;
-      setInterval(() => {
-        el.querySelectorAll('.pl-word').forEach((s, i) => {
-          s.classList.toggle('active', i === idx);
-        });
-        idx = (idx + 1) % demoWords.length;
-      }, 800);
-    })();
-  </script>
+  // Download
+  const blob = new Blob([content], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `captions.${ext}`; a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported as ${format.toUpperCase()}!`);
+}
 
+function fmtSRT(s) {
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60), ms = Math.floor((s%1)*1000);
+  return `${pad(h)}:${pad(m)}:${pad(sec)},${String(ms).padStart(3,'0')}`;
+}
+function fmtVTT(s) {
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60), ms = Math.floor((s%1)*1000);
+  return `${pad(h)}:${pad(m)}:${pad(sec)}.${String(ms).padStart(3,'0')}`;
+}
+function fmtASS(s) {
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60), cs = Math.floor((s%1)*100);
+  return `${pad(h)}:${pad(m)}:${pad(sec)}.${String(cs).padStart(2,'0')}`;
+}
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ─── Customize ───
+function setupCustomize() {
+  const sizeSlider = document.getElementById('captionSize');
+  const sizeVal = document.getElementById('captionSizeVal');
+  sizeSlider.oninput = () => { sizeVal.textContent = sizeSlider.value; };
+}
+
+// ─── Install Copy ───
+function setupInstallCopy() {
+  document.getElementById('installCmd').onclick = () => {
+    navigator.clipboard.writeText('npx captioneer init my-video');
+    showToast('Copied to clipboard!');
+  };
+}
+
+// ─── Toast ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── Start ───
+init();
+</script>
 </body>
 </html>
