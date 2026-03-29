@@ -9,140 +9,114 @@
 :root{
   --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a28;--border:#2a2a3a;
   --text:#e8e8f0;--text2:#8888a0;--accent:#6c5ce7;--accent2:#a29bfe;
-  --green:#00cec9;--red:#ff6b6b;--orange:#fdcb6e;
-  --radius:12px;--font:'Inter',system-ui,-apple-system,sans-serif;
+  --green:#00cec9;--radius:12px;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.6}
 a{color:var(--accent2);text-decoration:none}
 .container{max-width:1200px;margin:0 auto;padding:0 20px}
 
-/* Hero */
-.hero{text-align:center;padding:60px 20px 40px;position:relative}
+.hero{text-align:center;padding:50px 20px 30px;position:relative}
 .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(108,92,231,.15) 0%,transparent 70%);pointer-events:none}
-.badge{display:inline-block;padding:4px 14px;border-radius:20px;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);color:var(--accent2);font-size:13px;margin-bottom:16px}
-.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;background:linear-gradient(135deg,#e8e8f0 0%,#a29bfe 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
-.hero p{color:var(--text2);font-size:clamp(1rem,2vw,1.15rem);max-width:600px;margin:0 auto 30px}
-.hero-links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent2)}
-.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{border-color:var(--accent)}
+.badge{display:inline-block;padding:4px 14px;border-radius:20px;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);color:var(--accent2);font-size:13px;margin-bottom:12px}
+.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;background:linear-gradient(135deg,#e8e8f0 0%,#a29bfe 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.hero p{color:var(--text2);font-size:clamp(.95rem,2vw,1.1rem);max-width:560px;margin:0 auto 24px}
+.hero-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent)}
 
-/* Demo Section */
-.demo-section{padding:40px 0}
-.demo-grid{display:grid;grid-template-columns:1fr 340px;gap:24px}
-@media(max-width:900px){.demo-grid{grid-template-columns:1fr}}
+/* Demo */
+.demo{padding:30px 0}
+.demo-layout{display:grid;grid-template-columns:1fr 300px;gap:20px}
+@media(max-width:860px){.demo-layout{grid-template-columns:1fr}}
 
-/* Preview */
-.preview-container{background:#000;border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:16/9;max-height:500px}
-.preview-area{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;padding:40px 30px;position:relative;background:linear-gradient(180deg,#111 0%,#0a0a0a 100%)}
-.preview-area video,.preview-area audio{display:none}
+.screen{background:#000;border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:16/9;max-height:480px}
+.screen-inner{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#111,#0a0a0a)}
 
-/* Caption rendering area */
-.caption-display{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none}
-.caption-text{font-size:clamp(1.2rem,3vw,2.2rem);font-weight:700;text-align:center;max-width:90%;word-wrap:break-word;transition:all .15s}
+.caption-area{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none}
+.caption-el{font-size:clamp(1.1rem,3vw,2rem);font-weight:700;text-align:center;max-width:90%;transition:all .15s}
 
-/* Upload overlay */
-.upload-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.8);border:2px dashed var(--border);border-radius:var(--radius);cursor:pointer;transition:all .3s;z-index:10}
-.upload-overlay:hover,.upload-overlay.drag-over{border-color:var(--accent);background:rgba(108,92,231,.1)}
-.upload-overlay.hidden{display:none}
-.upload-icon{font-size:48px;margin-bottom:12px}
-.upload-overlay p{color:var(--text2);font-size:14px}
-.upload-overlay .or{color:var(--text2);margin:8px 0;font-size:13px}
-
-/* Controls */
-.controls-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-top:1px solid var(--border)}
-.play-btn{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.controls{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-top:1px solid var(--border)}
+.play-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .play-btn:hover{background:var(--accent2)}
-.progress-bar{flex:1;height:4px;background:var(--surface2);border-radius:2px;cursor:pointer;position:relative}
-.progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .1s linear}
-.time-display{font-size:12px;color:var(--text2);min-width:70px;text-align:right}
-.demo-btn{padding:6px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap}
-.demo-btn:hover{border-color:var(--accent)}
+.prog-wrap{flex:1;height:4px;background:var(--surface2);border-radius:2px;cursor:pointer;position:relative}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;pointer-events:none}
+.time{font-size:11px;color:var(--text2);min-width:65px;text-align:right;white-space:nowrap}
 
 /* Waveform */
-.waveform-container{height:80px;background:var(--surface);border-top:1px solid var(--border);position:relative}
-.waveform-container canvas{width:100%;height:100%}
+.wave-box{height:70px;background:var(--surface);border-top:1px solid var(--border);position:relative}
+.wave-box canvas{width:100%;height:100%;display:block}
+
+/* Style indicator */
+.style-label{text-align:center;padding:8px;background:var(--surface);border-top:1px solid var(--border);font-size:12px;color:var(--accent2)}
 
 /* Sidebar */
-.sidebar{display:flex;flex-direction:column;gap:16px}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
-.panel-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:12px}
+.sidebar{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.panel-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:10px}
+.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.style-btn{padding:7px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;cursor:pointer;text-align:center;transition:all .15s}
+.style-btn:hover{border-color:var(--accent)}.style-btn.active{background:rgba(108,92,231,.2);border-color:var(--accent);color:var(--accent2)}
 
-/* Style selector */
-.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.style-btn{padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;cursor:pointer;text-align:center;transition:all .15s}
-.style-btn:hover{border-color:var(--accent)}
-.style-btn.active{background:rgba(108,92,231,.2);border-color:var(--accent);color:var(--accent2)}
-
-/* Customization */
-.custom-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.custom-row label{font-size:13px;color:var(--text2);min-width:60px}
-.custom-row input[type="color"]{width:32px;height:28px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;padding:0}
+.custom-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.custom-row label{font-size:12px;color:var(--text2);min-width:45px}
+.custom-row input[type="color"]{width:28px;height:24px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;padding:0}
 .custom-row input[type="range"]{flex:1;accent-color:var(--accent)}
-.custom-row .val{font-size:12px;color:var(--text2);min-width:30px;text-align:right}
-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px;width:100%}
+.custom-row .val{font-size:11px;color:var(--text2);min-width:24px;text-align:right}
+select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:6px;font-size:12px;width:100%}
 
-/* Export */
-.export-btns{display:flex;gap:8px;flex-wrap:wrap}
-.export-btn{padding:8px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.export-btns{display:flex;gap:6px;flex-wrap:wrap}
+.export-btn{padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
 .export-btn:hover{border-color:var(--green);color:var(--green)}
 
-/* Caption data display */
-.caption-data{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-top:24px;padding:20px;max-height:300px;overflow:auto}
-.caption-data h3{font-size:14px;color:var(--text2);margin-bottom:12px}
-.caption-data pre{font-size:12px;color:var(--green);white-space:pre-wrap;word-break:break-all}
+/* Upload section */
+.upload-area{margin-top:20px;padding:30px;border:2px dashed var(--border);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all .3s}
+.upload-area:hover{border-color:var(--accent);background:rgba(108,92,231,.05)}
+.upload-area p{color:var(--text2);font-size:14px;margin-top:8px}
+.upload-area input{display:none}
 
-/* Style Showcase */
-.showcase{padding:60px 0}
-.showcase h2{text-align:center;font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
-.showcase .sub{text-align:center;color:var(--text2);margin-bottom:40px}
-.showcase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.showcase-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s}
-.showcase-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.card-preview{height:120px;display:flex;align-items:center;justify-content:center;padding:16px;font-size:18px;font-weight:700;text-align:center;background:#000}
-.card-info{padding:12px 16px}
-.card-info h4{font-size:14px;margin-bottom:2px}
-.card-info p{font-size:12px;color:var(--text2)}
+/* Showcase */
+.showcase{padding:50px 0}
+.showcase h2{text-align:center;font-size:clamp(1.3rem,3vw,1.8rem);margin-bottom:6px}
+.showcase .sub{text-align:center;color:var(--text2);margin-bottom:30px;font-size:14px}
+.showcase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card-prev{height:100px;display:flex;align-items:center;justify-content:center;padding:14px;font-size:16px;font-weight:700;text-align:center;background:#000}
+.card-body{padding:10px 14px}
+.card-body h4{font-size:13px;margin-bottom:2px}.card-body p{font-size:11px;color:var(--text2)}
 
 /* Features */
-.features{padding:60px 0}
-.features h2{text-align:center;font-size:clamp(1.5rem,3vw,2rem);margin-bottom:40px}
-.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
-.feature{padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
-.feature h3{font-size:16px;margin-bottom:8px}
-.feature p{font-size:14px;color:var(--text2)}
+.features{padding:50px 0}
+.features h2{text-align:center;font-size:clamp(1.3rem,3vw,1.8rem);margin-bottom:30px}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.feat{padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.feat h3{font-size:15px;margin-bottom:6px}.feat p{font-size:13px;color:var(--text2)}
 
-/* Install */
-.install-section{padding:60px 0;text-align:center}
-.install-section h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:16px}
-.install-cmd{display:inline-block;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 32px;font-family:monospace;font-size:16px;color:var(--green);cursor:pointer;position:relative;margin-top:12px}
-.install-cmd:hover{border-color:var(--accent)}
-.copy-hint{font-size:12px;color:var(--text2);margin-top:8px}
+.install{text-align:center;padding:40px 0}
+.install h2{margin-bottom:12px}
+.cmd-box{display:inline-block;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 28px;font-family:monospace;font-size:15px;color:var(--green);cursor:pointer}
+.cmd-box:hover{border-color:var(--accent)}
+.hint{font-size:11px;color:var(--text2);margin-top:6px}
 
-/* Footer */
-footer{text-align:center;padding:40px 20px;border-top:1px solid var(--border);color:var(--text2);font-size:13px}
-footer a{margin:0 8px}
+footer{text-align:center;padding:30px 20px;border-top:1px solid var(--border);color:var(--text2);font-size:12px}
+footer a{margin:0 6px}
 
-/* Toast */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--green);color:var(--green);padding:8px 18px;border-radius:8px;font-size:12px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 
-/* Style-specific animations */
 @keyframes glow-pulse{0%,100%{text-shadow:0 0 10px var(--accent),0 0 20px var(--accent)}50%{text-shadow:0 0 20px var(--accent),0 0 40px var(--accent),0 0 60px var(--accent)}}
-@keyframes wave-anim{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
-@keyframes bounce-anim{0%,100%{transform:scaleY(1)}30%{transform:scaleY(1.3)}60%{transform:scaleY(0.9)}}
-@keyframes flicker-anim{0%,100%{opacity:1}10%{opacity:.8}20%{opacity:1}40%{opacity:.6}50%{opacity:1}70%{opacity:.8}80%{opacity:1}}
-@keyframes typewriter-blink{0%,100%{border-color:var(--accent)}50%{border-color:transparent}}
-@keyframes rainbow-shift{0%{color:#ff6b6b}16%{color:#fdcb6e}33%{color:#00cec9}50%{color:#6c5ce7}66%{color:#a29bfe}83%{color:#fd79a8}100%{color:#ff6b6b}}
-@keyframes scale-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-@keyframes spotlight-sweep{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes wave-a{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+@keyframes bounce-a{0%,100%{transform:scaleY(1)}30%{transform:scaleY(1.3)}60%{transform:scaleY(.9)}}
+@keyframes flicker-a{0%,100%{opacity:1}10%{opacity:.7}20%{opacity:1}40%{opacity:.5}50%{opacity:1}70%{opacity:.8}80%{opacity:1}}
+@keyframes tw-blink{0%,100%{border-color:var(--accent)}50%{border-color:transparent}}
+@keyframes rainbow-s{0%{color:#ff6b6b}16%{color:#fdcb6e}33%{color:#00cec9}50%{color:#6c5ce7}66%{color:#a29bfe}83%{color:#fd79a8}100%{color:#ff6b6b}}
+@keyframes scale-a{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes spot-sweep{0%{background-position:-200% center}100%{background-position:200% center}}
 </style>
 </head>
 <body>
 
-<!-- Hero -->
 <section class="hero">
   <div class="badge">🎬 Open Source Caption Toolkit</div>
   <h1>Remotion Captioneer</h1>
@@ -150,91 +124,54 @@ footer a{margin:0 8px}
   <div class="hero-links">
     <a href="https://github.com/neutral-Stage/remotion-captioneer" target="_blank" class="btn btn-primary">⭐ GitHub</a>
     <a href="https://www.npmjs.com/package/remotion-captioneer" target="_blank" class="btn btn-secondary">📦 npm</a>
-    <a href="#demo" class="btn btn-secondary">▶ Try Demo</a>
+    <a href="#demo" class="btn btn-secondary">▶ Live Demo</a>
   </div>
 </section>
 
-<!-- Interactive Demo -->
-<section class="demo-section" id="demo">
+<section class="demo" id="demo">
   <div class="container">
-    <div class="demo-grid">
-      <!-- Preview -->
+    <div class="demo-layout">
       <div>
-        <div class="preview-container" id="previewContainer">
-          <div class="upload-overlay" id="uploadOverlay">
-            <div class="upload-icon">🎵</div>
-            <p>Drag &amp; drop audio or click to upload</p>
-            <div class="or">— or —</div>
-            <button class="demo-btn" id="useDemoBtn" style="margin-top:4px;padding:8px 20px;font-size:13px">▶ Use Demo Captions</button>
-            <input type="file" id="audioInput" accept="audio/*" style="display:none">
+        <div class="screen" id="screen">
+          <div class="screen-inner">
+            <div class="caption-area"><div class="caption-el" id="capEl"></div></div>
           </div>
-          <div class="preview-area" id="previewArea">
-            <div class="caption-display">
-              <div class="caption-text" id="captionText"></div>
-            </div>
-          </div>
-          <div class="controls-bar">
+          <div class="controls">
             <button class="play-btn" id="playBtn" title="Play/Pause">▶</button>
-            <div class="progress-bar" id="progressBar">
-              <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+            <div class="prog-wrap" id="progBar"><div class="prog-fill" id="progFill"></div></div>
+            <span class="time" id="timeDisp">0:00 / 0:00</span>
           </div>
-          <div class="waveform-container">
-            <canvas id="waveformCanvas"></canvas>
-          </div>
+          <div class="wave-box"><canvas id="waveCanvas"></canvas></div>
+          <div class="style-label" id="styleLabel">word-highlight</div>
         </div>
-        <!-- Caption data -->
-        <div class="caption-data" id="captionDataPanel" style="display:none">
-          <h3>📋 Caption Data <span style="float:right;cursor:pointer" id="closeCaptionData">✕</span></h3>
-          <pre id="captionDataPre"></pre>
+
+        <div class="upload-area" id="uploadArea">
+          <div style="font-size:32px">🎵</div>
+          <p>Drag &amp; drop audio or <strong>click to upload</strong></p>
+          <p style="font-size:12px;color:var(--text2)">Upload your own audio to see captions with your file</p>
+          <input type="file" id="audioFile" accept="audio/*">
         </div>
       </div>
 
-      <!-- Sidebar -->
       <div class="sidebar">
-        <!-- Style Selector -->
         <div class="panel">
           <div class="panel-title">Caption Style</div>
           <div class="style-grid" id="styleGrid"></div>
         </div>
-
-        <!-- Customization -->
         <div class="panel">
           <div class="panel-title">Customize</div>
-          <div class="custom-row">
-            <label>Color</label>
-            <input type="color" id="captionColor" value="#ffffff">
-          </div>
-          <div class="custom-row">
-            <label>Bg</label>
-            <input type="color" id="captionBg" value="#6c5ce7">
-          </div>
-          <div class="custom-row">
-            <label>Size</label>
-            <input type="range" id="captionSize" min="16" max="48" value="28">
-            <span class="val" id="captionSizeVal">28</span>
-          </div>
-          <div class="custom-row">
-            <label>Font</label>
-            <select id="captionFont">
-              <option value="'Inter',sans-serif">Inter</option>
-              <option value="monospace">Monospace</option>
-              <option value="'Georgia',serif">Georgia</option>
-              <option value="'Impact',sans-serif">Impact</option>
-              <option value="'Comic Sans MS',cursive">Comic Sans</option>
-            </select>
-          </div>
+          <div class="custom-row"><label>Color</label><input type="color" id="capColor" value="#ffffff"></div>
+          <div class="custom-row"><label>Bg</label><input type="color" id="capBg" value="#6c5ce7"></div>
+          <div class="custom-row"><label>Size</label><input type="range" id="capSize" min="14" max="48" value="26"><span class="val" id="capSizeVal">26</span></div>
+          <div class="custom-row"><label>Font</label><select id="capFont"><option>Inter, sans-serif</option><option>monospace</option><option>Georgia, serif</option><option>Impact, sans-serif</option></select></div>
         </div>
-
-        <!-- Export -->
         <div class="panel">
-          <div class="panel-title">Export</div>
+          <div class="panel-title">Export Captions</div>
           <div class="export-btns">
-            <button class="export-btn" data-format="srt">SRT</button>
-            <button class="export-btn" data-format="vtt">VTT</button>
-            <button class="export-btn" data-format="ass">ASS</button>
-            <button class="export-btn" data-format="json">JSON</button>
+            <button class="export-btn" data-fmt="srt">SRT</button>
+            <button class="export-btn" data-fmt="vtt">VTT</button>
+            <button class="export-btn" data-fmt="ass">ASS</button>
+            <button class="export-btn" data-fmt="json">JSON</button>
           </div>
         </div>
       </div>
@@ -242,7 +179,6 @@ footer a{margin:0 8px}
   </div>
 </section>
 
-<!-- Style Showcase -->
 <section class="showcase">
   <div class="container">
     <h2>14 Caption Styles</h2>
@@ -251,530 +187,444 @@ footer a{margin:0 8px}
   </div>
 </section>
 
-<!-- Features -->
 <section class="features">
   <div class="container">
     <h2>Everything You Need</h2>
-    <div class="features-grid">
-      <div class="feature"><h3>🎬 14 Caption Styles</h3><p>Word-highlight, karaoke, typewriter, bounce, wave, glow, pill, flicker, rainbow, scale, spotlight, and more.</p></div>
-      <div class="feature"><h3>🎤 5 STT Providers</h3><p>Local whisper.cpp, OpenAI, Groq, Deepgram, AssemblyAI — pick your speed vs accuracy tradeoff.</p></div>
-      <div class="feature"><h3>🎵 Audio-Video Sync</h3><p>Beat detection, volume hooks, energy analysis, timeline interpolation — all frame-accurate.</p></div>
-      <div class="feature"><h3>📦 7 Export Formats</h3><p>SRT, VTT, ASS, TXT, word-level SRT &amp; VTT, plus @remotion/captions compatibility.</p></div>
-      <div class="feature"><h3>🎨 24 Presets</h3><p>Social, Podcast, Cinematic, Music, Tutorial, Minimal, Gaming, News, Education, Fun — ready to use.</p></div>
-      <div class="feature"><h3>📐 Layout Primitives</h3><p>Container, Stack, Grid, Columns, Positioned, Overlay, GradientBg, FadeIn, SlideUp, Center.</p></div>
-      <div class="feature"><h3>😀 Emoji Reactions</h3><p>Auto-generate emoji reactions from captions with 60+ keyword→emoji mappings.</p></div>
-      <div class="feature"><h3>🖥 CLI &amp; Preview</h3><p>10 CLI commands, live preview server, project scaffolder with <code>npx captioneer init</code>.</p></div>
+    <div class="feat-grid">
+      <div class="feat"><h3>🎬 14 Styles</h3><p>Word-highlight, karaoke, typewriter, bounce, wave, glow, pill, flicker, rainbow, scale, spotlight, and more.</p></div>
+      <div class="feat"><h3>🎤 5 STT Providers</h3><p>Local whisper.cpp, OpenAI, Groq, Deepgram, AssemblyAI.</p></div>
+      <div class="feat"><h3>🎵 Audio-Video Sync</h3><p>Beat detection, volume hooks, energy analysis — all frame-accurate.</p></div>
+      <div class="feat"><h3>📦 7 Export Formats</h3><p>SRT, VTT, ASS, TXT, word-level SRT &amp; VTT, @remotion/captions compat.</p></div>
+      <div class="feat"><h3>🎨 24 Presets</h3><p>Social, Podcast, Cinematic, Music, Tutorial, Minimal, Gaming, News, Education, Fun.</p></div>
+      <div class="feat"><h3>📐 Layout Primitives</h3><p>Container, Stack, Grid, Columns, Positioned, Overlay, GradientBg, FadeIn, SlideUp.</p></div>
+      <div class="feat"><h3>😀 Emoji Reactions</h3><p>Auto-generate emoji from captions with 60+ keyword mappings.</p></div>
+      <div class="feat"><h3>🖥 CLI &amp; Preview</h3><p>10 CLI commands, live preview server, <code>npx captioneer init</code>.</p></div>
     </div>
   </div>
 </section>
 
-<!-- Install -->
-<section class="install-section">
+<section class="install">
   <div class="container">
     <h2>Get Started</h2>
-    <div class="install-cmd" id="installCmd">npx captioneer init my-video</div>
-    <div class="copy-hint">Click to copy</div>
+    <div class="cmd-box" id="cmdBox">npx captioneer init my-video</div>
+    <div class="hint">Click to copy</div>
   </div>
 </section>
 
 <footer>
-  <p>
-    <a href="https://github.com/neutral-Stage/remotion-captioneer">GitHub</a> ·
-    <a href="https://www.npmjs.com/package/remotion-captioneer">npm</a> ·
-    <a href="https://github.com/neutral-Stage/remotion-captioneer/issues">Issues</a> ·
-    MIT License
-  </p>
+  <a href="https://github.com/neutral-Stage/remotion-captioneer">GitHub</a> ·
+  <a href="https://www.npmjs.com/package/remotion-captioneer">npm</a> ·
+  <a href="https://github.com/neutral-Stage/remotion-captioneer/issues">Issues</a> · MIT License
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── State ───
 const STYLES = [
   {id:'word-highlight',name:'Word Highlight',desc:'Current word pops with color'},
   {id:'karaoke',name:'Karaoke',desc:'Fill color sweeps across words'},
   {id:'typewriter',name:'Typewriter',desc:'Characters appear one by one'},
   {id:'typewriter-erase',name:'Type & Erase',desc:'Type in then erase before next'},
-  {id:'bounce',name:'Bounce',desc:'Words bounce in with spring physics'},
+  {id:'bounce',name:'Bounce',desc:'Words bounce with spring physics'},
   {id:'wave',name:'Wave',desc:'Words wave up and down'},
   {id:'glow',name:'Glow',desc:'Neon glow pulsing effect'},
-  {id:'pill',name:'Pill',desc:'Rounded pill-shaped background'},
-  {id:'flicker',name:'Flicker',desc:'Flickering neon sign effect'},
-  {id:'highlighter',name:'Highlighter',desc:'Yellow marker highlight sweep'},
+  {id:'pill',name:'Pill',desc:'Rounded pill background'},
+  {id:'flicker',name:'Flicker',desc:'Flickering neon sign'},
+  {id:'highlighter',name:'Highlighter',desc:'Yellow marker highlight'},
   {id:'blur',name:'Blur',desc:'Blur in/out reveal'},
   {id:'rainbow',name:'Rainbow',desc:'Cycling rainbow colors'},
-  {id:'scale',name:'Scale',desc:'Words scale up on emphasis'},
+  {id:'scale',name:'Scale',desc:'Words scale on emphasis'},
   {id:'spotlight',name:'Spotlight',desc:'Spotlight sweep reveal'}
 ];
 
-let currentStyle = 'word-highlight';
-let captions = [];
-let audioCtx = null;
-let audioBuffer = null;
-let sourceNode = null;
-let analyser = null;
-let isPlaying = false;
-let startTime = 0;
-let duration = 0;
-let animFrame = null;
-let audioElement = null;
-let waveformData = null;
+// Demo sentence — repeats
+const DEMO_LINES = [
+  "Add beautiful animated captions to your videos",
+  "Fourteen different styles to choose from",
+  "Word level timing with STT providers",
+  "Export to SRT VTT ASS and more",
+  "Built for Remotion the React video framework",
+  "Open source and free to use forever"
+];
+const WORD_DUR = 0.4;
 
-// ─── Demo captions (simulated word-level timing) ───
-const DEMO_TEXT = "Remotion Captioneer makes it easy to add beautiful animated captions to your Remotion videos with fourteen different styles to choose from";
-const DEMO_WORDS = DEMO_TEXT.split(' ');
-const WORD_DURATION = 0.35; // seconds per word
-const DEMO_CAPTIONS = DEMO_WORDS.map((word, i) => ({
-  text: word,
-  start: i * WORD_DURATION,
-  end: (i + 1) * WORD_DURATION,
-  conf: 0.95
-}));
+let state = {
+  style: 'word-highlight',
+  captions: [],
+  playing: false,
+  audioCtx: null,
+  audioBuf: null,
+  srcNode: null,
+  analyser: null,
+  startT: 0,
+  duration: 0,
+  raf: null,
+  autoCycle: true,
+  lineIdx: 0
+};
 
 // ─── Init ───
-function init() {
+(function init() {
   buildStyleGrid();
   buildShowcase();
   setupUpload();
   setupControls();
   setupExport();
   setupCustomize();
-  setupInstallCopy();
-  document.getElementById('closeCaptionData').onclick = () => {
-    document.getElementById('captionDataPanel').style.display = 'none';
-  };
-}
 
-// ─── Style Grid ───
+  // Auto-start demo after short delay
+  setTimeout(() => {
+    loadDemoLine();
+    startPlay();
+  }, 600);
+})();
+
 function buildStyleGrid() {
   const grid = document.getElementById('styleGrid');
   STYLES.forEach(s => {
-    const btn = document.createElement('button');
-    btn.className = 'style-btn' + (s.id === currentStyle ? ' active' : '');
-    btn.textContent = s.name;
-    btn.dataset.style = s.id;
-    btn.onclick = () => selectStyle(s.id);
-    grid.appendChild(btn);
+    const b = document.createElement('button');
+    b.className = 'style-btn' + (s.id === state.style ? ' active' : '');
+    b.textContent = s.name;
+    b.dataset.style = s.id;
+    b.onclick = () => {
+      state.autoCycle = false;
+      pickStyle(s.id);
+    };
+    grid.appendChild(b);
   });
 }
 
-function selectStyle(id) {
-  currentStyle = id;
+function pickStyle(id) {
+  state.style = id;
   document.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.style === id));
+  document.getElementById('styleLabel').textContent = id;
 }
 
-// ─── Showcase Cards ───
 function buildShowcase() {
   const grid = document.getElementById('showcaseGrid');
   STYLES.forEach(s => {
-    const card = document.createElement('div');
-    card.className = 'showcase-card';
-    card.onclick = () => { selectStyle(s.id); document.getElementById('demo').scrollIntoView({behavior:'smooth'}); };
-    card.innerHTML = `
-      <div class="card-preview" id="showcase-${s.id}"><span class="showcase-text">Hello World</span></div>
-      <div class="card-info"><h4>${s.name}</h4><p>${s.desc}</p></div>
-    `;
-    grid.appendChild(card);
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.onclick = () => { state.autoCycle = false; pickStyle(s.id); document.getElementById('demo').scrollIntoView({behavior:'smooth'}); };
+    c.innerHTML = `<div class="card-prev" id="sc-${s.id}"><span>Hello World</span></div><div class="card-body"><h4>${s.name}</h4><p>${s.desc}</p></div>`;
+    grid.appendChild(c);
   });
-  animateShowcaseCards();
+  animateShowcase();
 }
 
-function animateShowcaseCards() {
-  const anims = {
-    'word-highlight': (el) => { el.style.color = '#fff'; setInterval(()=>{el.style.color = el.style.color === '#fff' ? '#6c5ce7' : '#fff';}, 1200); },
-    'karaoke': (el) => { el.style.background = 'linear-gradient(90deg,#6c5ce7 50%,#888 50%)'; el.style.backgroundSize = '200% 100%'; el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent'; setInterval(()=>{el.style.backgroundPosition = el.style.backgroundPosition === '0% 50%' ? '100% 50%' : '0% 50%';}, 1500); },
-    'typewriter': (el) => { el.style.borderRight = '2px solid #6c5ce7'; el.style.animation = 'typewriter-blink .7s infinite'; },
-    'typewriter-erase': (el) => { el.style.opacity = '1'; setInterval(()=>{el.style.opacity = el.style.opacity === '1' ? '0.2' : '1';}, 1000); },
-    'bounce': (el) => { el.style.animation = 'bounce-anim 1s ease infinite'; },
-    'wave': (el) => { el.style.animation = 'wave-anim 1.5s ease-in-out infinite'; },
-    'glow': (el) => { el.style.color = '#a29bfe'; el.style.animation = 'glow-pulse 2s ease-in-out infinite'; },
-    'pill': (el) => { el.style.background = 'rgba(108,92,231,.3)'; el.style.padding = '8px 24px'; el.style.borderRadius = '50px'; el.style.border = '1px solid rgba(108,92,231,.5)'; },
-    'flicker': (el) => { el.style.color = '#fdcb6e'; el.style.animation = 'flicker-anim 2s linear infinite'; },
-    'highlighter': (el) => { el.style.background = 'linear-gradient(transparent 60%, #fdcb6e 60%)'; el.style.display = 'inline'; },
-    'blur': (el) => { el.style.filter = 'blur(0px)'; setInterval(()=>{el.style.filter = el.style.filter === 'blur(0px)' ? 'blur(4px)' : 'blur(0px)';}, 1500); },
-    'rainbow': (el) => { el.style.animation = 'rainbow-shift 3s linear infinite'; },
-    'scale': (el) => { el.style.animation = 'scale-pulse 1.5s ease-in-out infinite'; },
-    'spotlight': (el) => { el.style.background = 'linear-gradient(90deg,transparent 0%,#fff 50%,transparent 100%)'; el.style.backgroundSize = '200% 100%'; el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent'; el.style.color = '#fff'; el.style.animation = 'spotlight-sweep 2s linear infinite'; }
+function animateShowcase() {
+  const do_ = {
+    'word-highlight': e => setInterval(()=>{e.style.color=e.style.color==='#fff'?'#6c5ce7':'#fff'},1200),
+    'karaoke': e => {e.style.background='linear-gradient(90deg,#6c5ce7 50%,#666 50%)';e.style.backgroundSize='200%';e.style.webkitBackgroundClip='text';e.style.webkitTextFillColor='transparent';setInterval(()=>{e.style.backgroundPosition=e.style.backgroundPosition==='0% 50%'?'100% 50%':'0% 50%'},1500)},
+    'typewriter': e => {e.style.borderRight='2px solid #6c5ce7';e.style.animation='tw-blink .7s infinite'},
+    'typewriter-erase': e => setInterval(()=>{e.style.opacity=e.style.opacity==='1'?'0.2':'1'},1000),
+    'bounce': e => e.style.animation='bounce-a 1s ease infinite',
+    'wave': e => e.style.animation='wave-a 1.5s ease-in-out infinite',
+    'glow': e => {e.style.color='#a29bfe';e.style.animation='glow-pulse 2s ease-in-out infinite'},
+    'pill': e => {e.style.background='rgba(108,92,231,.3)';e.style.padding='6px 20px';e.style.borderRadius='50px';e.style.border='1px solid rgba(108,92,231,.5)'},
+    'flicker': e => {e.style.color='#fdcb6e';e.style.animation='flicker-a 2s linear infinite'},
+    'highlighter': e => {e.style.background='linear-gradient(transparent 55%,#fdcb6e66 55%)';e.style.display='inline'},
+    'blur': e => setInterval(()=>{e.style.filter=e.style.filter==='blur(0px)'?'blur(4px)':'blur(0px)'},1500),
+    'rainbow': e => e.style.animation='rainbow-s 3s linear infinite',
+    'scale': e => e.style.animation='scale-a 1.5s ease-in-out infinite',
+    'spotlight': e => {e.style.background='linear-gradient(90deg,transparent 0%,#fff 50%,transparent 100%)';e.style.backgroundSize='200%';e.style.webkitBackgroundClip='text';e.style.webkitTextFillColor='transparent';e.style.animation='spot-sweep 2s linear infinite'}
   };
   STYLES.forEach(s => {
-    const el = document.querySelector(`#showcase-${s.id} .showcase-text`);
-    if (el && anims[s.id]) anims[s.id](el);
+    const el = document.querySelector(`#sc-${s.id} span`);
+    if (el && do_[s.id]) do_[s.id](el);
   });
 }
 
-// ─── Upload ───
-function setupUpload() {
-  const overlay = document.getElementById('uploadOverlay');
-  const input = document.getElementById('audioInput');
-  const demoBtn = document.getElementById('useDemoBtn');
-
-  overlay.onclick = (e) => { if (e.target !== demoBtn) input.click(); };
-  demoBtn.onclick = (e) => { e.stopPropagation(); startDemo(); };
-
-  input.onchange = (e) => { if (e.target.files[0]) loadAudio(e.target.files[0]); };
-
-  overlay.ondragover = (e) => { e.preventDefault(); overlay.classList.add('drag-over'); };
-  overlay.ondragleave = () => overlay.classList.remove('drag-over');
-  overlay.ondrop = (e) => { e.preventDefault(); overlay.classList.remove('drag-over'); if (e.dataTransfer.files[0]) loadAudio(e.dataTransfer.files[0]); };
+// ─── Demo Captions ───
+function loadDemoLine() {
+  const line = DEMO_LINES[state.lineIdx % DEMO_LINES.length];
+  const words = line.split(' ');
+  state.captions = words.map((w, i) => ({text: w, start: i * WORD_DUR, end: (i+1) * WORD_DUR}));
+  state.duration = words.length * WORD_DUR;
 }
 
-async function loadAudio(file) {
-  stopPlayback();
-  const overlay = document.getElementById('uploadOverlay');
-  overlay.classList.add('hidden');
-
-  // Create audio element for playback
-  const url = URL.createObjectURL(file);
-  audioElement = new Audio(url);
-  audioElement.crossOrigin = 'anonymous';
-  await new Promise(r => { audioElement.onloadedmetadata = r; });
-
-  duration = audioElement.duration;
-
-  // Decode for waveform
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const arrayBuf = await file.arrayBuffer();
-  audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
-  drawWaveform(audioBuffer);
-
-  // Generate simulated captions from duration
-  captions = generateSimulatedCaptions(duration);
-  showToast('Audio loaded! Press play to see captions.');
-}
-
-function startDemo() {
-  stopPlayback();
-  document.getElementById('uploadOverlay').classList.add('hidden');
-  captions = DEMO_CAPTIONS;
-  duration = DEMO_CAPTIONS.length * WORD_DURATION;
-
-  // Create synthetic waveform
-  const canvas = document.getElementById('waveformCanvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth * 2;
-  canvas.height = canvas.offsetHeight * 2;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const bars = 200;
-  for (let i = 0; i < bars; i++) {
-    const h = (Math.sin(i * 0.1) * 0.3 + 0.5 + Math.random() * 0.2) * canvas.height * 0.7;
-    const x = (i / bars) * canvas.width;
-    const w = Math.max(1, canvas.width / bars - 1);
-    ctx.fillStyle = 'rgba(108,92,231,0.4)';
-    ctx.fillRect(x, (canvas.height - h) / 2, w, h);
+function nextDemoLine() {
+  state.lineIdx++;
+  if (state.autoCycle) {
+    const idx = STYLES.findIndex(s => s.id === state.style);
+    pickStyle(STYLES[(idx + 1) % STYLES.length].id);
   }
+  loadDemoLine();
+}
 
-  // Create a synthetic audio buffer for playback
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const sr = audioCtx.sampleRate;
-  const len = Math.ceil(duration * sr);
-  audioBuffer = audioCtx.createBuffer(1, len, sr);
-  const data = audioBuffer.getChannelData(0);
+// ─── Playback ───
+function setupControls() {
+  document.getElementById('playBtn').onclick = () => {
+    if (state.playing) stopPlay(); else startPlay();
+  };
+}
+
+function startPlay() {
+  if (!state.captions.length) return;
+  stopPlay();
+
+  if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+
+  // Create a short synthetic tone for the current line
+  const sr = state.audioCtx.sampleRate;
+  const len = Math.ceil(state.duration * sr);
+  const buf = state.audioCtx.createBuffer(1, len, sr);
+  const d = buf.getChannelData(0);
   for (let i = 0; i < len; i++) {
     const t = i / sr;
-    // Generate a simple melody-like tone
-    const freq = 220 + Math.sin(t * 2) * 110;
-    data[i] = Math.sin(2 * Math.PI * freq * t) * 0.15 * (1 - t / duration);
+    d[i] = Math.sin(2 * Math.PI * (300 + Math.sin(t * 3) * 100) * t) * 0.08 * Math.max(0, 1 - t / state.duration);
   }
-  waveformData = null;
-  showToast('Demo mode! Press play to see all 14 styles in action.');
-}
+  state.audioBuf = buf;
 
-function generateSimulatedCaptions(dur) {
-  const words = "This is a simulated caption track upload your audio and connect an STT provider for real transcription support".split(' ');
-  const wDur = dur / words.length;
-  return words.map((w, i) => ({text: w, start: i * wDur, end: (i + 1) * wDur, conf: 0.9}));
-}
-
-// ─── Controls ───
-function setupControls() {
-  document.getElementById('playBtn').onclick = togglePlay;
-  document.getElementById('progressBar').onclick = seekTo;
-}
-
-function togglePlay() {
-  if (isPlaying) stopPlayback();
-  else startPlayback();
-}
-
-function startPlayback() {
-  if (!audioBuffer) return;
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-
-  sourceNode = audioCtx.createBufferSource();
-  sourceNode.buffer = audioBuffer;
-
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 256;
-  sourceNode.connect(analyser);
-  analyser.connect(audioCtx.destination);
-
-  sourceNode.start(0);
-  startTime = audioCtx.currentTime;
-  isPlaying = true;
+  state.srcNode = state.audioCtx.createBufferSource();
+  state.srcNode.buffer = buf;
+  state.analyser = state.audioCtx.createAnalyser();
+  state.analyser.fftSize = 256;
+  state.srcNode.connect(state.analyser);
+  state.analyser.connect(state.audioCtx.destination);
+  state.srcNode.start(0);
+  state.startT = state.audioCtx.currentTime;
+  state.playing = true;
   document.getElementById('playBtn').textContent = '⏸';
 
-  sourceNode.onended = () => { stopPlayback(); };
+  state.srcNode.onended = () => {
+    stopPlay();
+    // Auto-advance to next line
+    nextDemoLine();
+    setTimeout(() => startPlay(), 400);
+  };
   tick();
 }
 
-function stopPlayback() {
-  isPlaying = false;
-  if (sourceNode) { try { sourceNode.stop(); } catch(e){} sourceNode = null; }
-  if (animFrame) cancelAnimationFrame(animFrame);
+function stopPlay() {
+  state.playing = false;
+  if (state.srcNode) { try{state.srcNode.stop();}catch(e){} state.srcNode = null; }
+  if (state.raf) cancelAnimationFrame(state.raf);
   document.getElementById('playBtn').textContent = '▶';
-  document.getElementById('captionText').textContent = '';
-  document.getElementById('progressFill').style.width = '0%';
-  document.getElementById('timeDisplay').textContent = '0:00 / ' + formatTime(duration);
+  document.getElementById('capEl').textContent = '';
+  document.getElementById('progFill').style.width = '0%';
 }
 
 function tick() {
-  if (!isPlaying) return;
-  const elapsed = audioCtx.currentTime - startTime;
-  const progress = Math.min(elapsed / duration, 1);
+  if (!state.playing) return;
+  const elapsed = state.audioCtx.currentTime - state.startT;
+  const prog = Math.min(elapsed / state.duration, 1);
 
-  document.getElementById('progressFill').style.width = (progress * 100) + '%';
-  document.getElementById('timeDisplay').textContent = formatTime(elapsed) + ' / ' + formatTime(duration);
+  document.getElementById('progFill').style.width = (prog * 100) + '%';
+  document.getElementById('timeDisp').textContent = fmtT(elapsed) + ' / ' + fmtT(state.duration);
 
-  // Find current caption
-  const current = captions.find(c => elapsed >= c.start && elapsed < c.end);
-  if (current) renderCaption(current, elapsed);
-  else document.getElementById('captionText').textContent = '';
+  const cap = state.captions.find(c => elapsed >= c.start && elapsed < c.end);
+  if (cap) renderCap(cap, elapsed);
+  else document.getElementById('capEl').textContent = '';
 
-  // Live waveform from analyser
-  if (analyser) drawLiveWaveform();
-
-  animFrame = requestAnimationFrame(tick);
+  drawWave();
+  state.raf = requestAnimationFrame(tick);
 }
 
-function seekTo(e) {
-  if (!audioBuffer) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  const pct = (e.clientX - rect.left) / rect.width;
-  stopPlayback();
-  // For simplicity, restart from beginning (full seek requires more complex audio handling)
-  showToast('Seeking is limited in demo mode');
-}
+function fmtT(s) { return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0'); }
 
-function formatTime(s) {
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return m + ':' + String(sec).padStart(2, '0');
-}
-
-// ─── Caption Rendering ───
-function renderCaption(cap, elapsed) {
-  const el = document.getElementById('captionText');
-  const color = document.getElementById('captionColor').value;
-  const bgColor = document.getElementById('captionBg').value;
-  const size = document.getElementById('captionSize').value;
-  const font = document.getElementById('captionFont').value;
-  const progress = (elapsed - cap.start) / (cap.end - cap.start);
+// ─── Caption Renderer ───
+function renderCap(cap, elapsed) {
+  const el = document.getElementById('capEl');
+  const color = document.getElementById('capColor').value;
+  const bg = document.getElementById('capBg').value;
+  const size = document.getElementById('capSize').value;
+  const font = document.getElementById('capFont').value;
+  const p = (elapsed - cap.start) / (cap.end - cap.start);
 
   el.style.fontSize = size + 'px';
   el.style.fontFamily = font;
   el.style.color = color;
+  el.style.background = 'none';
+  el.style.padding = '';
+  el.style.border = '';
+  el.style.borderRadius = '';
+  el.style.filter = '';
+  el.style.transform = '';
+  el.style.animation = '';
+  el.style.textShadow = '';
+  el.style.webkitBackgroundClip = '';
+  el.style.webkitTextFillColor = '';
+  el.style.backgroundSize = '';
 
-  switch (currentStyle) {
+  switch (state.style) {
     case 'word-highlight':
-      el.innerHTML = `<span style="color:${color}">${cap.text}</span>`;
-      el.style.textShadow = `0 0 20px ${bgColor}`;
+      el.textContent = cap.text;
+      el.style.textShadow = `0 0 20px ${bg}`;
       break;
     case 'karaoke': {
-      const pct = Math.min(progress * 100, 100);
-      el.innerHTML = `<span style="background:linear-gradient(90deg,${bgColor} ${pct}%,${color} ${pct}%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${cap.text}</span>`;
+      const pct = Math.min(p * 100, 100);
+      el.textContent = cap.text;
+      el.style.background = `linear-gradient(90deg,${bg} ${pct}%,${color} ${pct}%)`;
+      el.style.backgroundSize = '100%';
+      el.style.webkitBackgroundClip = 'text';
+      el.style.webkitTextFillColor = 'transparent';
       break;
     }
     case 'typewriter': {
-      const chars = Math.floor(progress * cap.text.length);
-      el.innerHTML = cap.text.substring(0, chars + 1) + '<span style="border-right:2px solid ' + bgColor + ';animation:typewriter-blink .7s infinite">​</span>';
-      el.style.color = color;
+      const n = Math.floor(p * cap.text.length) + 1;
+      el.innerHTML = cap.text.substring(0, n) + '<span style="border-right:2px solid ' + bg + ';animation:tw-blink .7s infinite">​</span>';
       break;
     }
     case 'typewriter-erase': {
-      const phase = progress < 0.6 ? Math.floor((progress / 0.6) * cap.text.length) : Math.floor((1 - (progress - 0.6) / 0.4) * cap.text.length);
-      el.textContent = cap.text.substring(0, Math.max(1, phase));
-      el.style.color = color;
+      const n = p < 0.6 ? Math.floor((p/.6)*cap.text.length)+1 : Math.floor((1-(p-.6)/.4)*cap.text.length);
+      el.textContent = cap.text.substring(0, Math.max(1, n));
       break;
     }
     case 'bounce':
       el.textContent = cap.text;
-      el.style.transform = `scaleY(${1 + Math.sin(progress * Math.PI) * 0.2})`;
-      el.style.color = color;
-      el.style.textShadow = `0 0 15px ${bgColor}`;
+      el.style.transform = `scaleY(${1 + Math.sin(p*Math.PI)*0.25})`;
+      el.style.textShadow = `0 0 15px ${bg}`;
       break;
     case 'wave':
       el.textContent = cap.text;
-      el.style.transform = `translateY(${Math.sin(progress * Math.PI * 4) * 8}px)`;
-      el.style.color = color;
+      el.style.transform = `translateY(${Math.sin(p*Math.PI*4)*8}px)`;
       break;
     case 'glow':
       el.textContent = cap.text;
-      el.style.color = bgColor;
-      el.style.textShadow = `0 0 ${10 + progress * 30}px ${bgColor}, 0 0 ${20 + progress * 50}px ${bgColor}`;
+      el.style.color = bg;
+      el.style.textShadow = `0 0 ${10+p*30}px ${bg}, 0 0 ${20+p*50}px ${bg}`;
       break;
     case 'pill':
       el.textContent = cap.text;
-      el.style.background = bgColor + '44';
+      el.style.background = bg + '44';
       el.style.padding = '8px 24px';
       el.style.borderRadius = '50px';
-      el.style.border = `1px solid ${bgColor}88`;
-      el.style.color = color;
+      el.style.border = `1px solid ${bg}88`;
       break;
     case 'flicker':
       el.textContent = cap.text;
       el.style.color = '#fdcb6e';
-      el.style.opacity = 0.6 + Math.random() * 0.4;
-      el.style.textShadow = `0 0 ${5 + Math.random() * 15}px #fdcb6e`;
+      el.style.opacity = .6 + Math.random()*.4;
+      el.style.textShadow = `0 0 ${5+Math.random()*15}px #fdcb6e`;
       break;
     case 'highlighter':
       el.textContent = cap.text;
-      el.style.background = `linear-gradient(transparent 55%, #fdcb6e66 55%)`;
-      el.style.color = color;
+      el.style.background = 'linear-gradient(transparent 55%, #fdcb6e66 55%)';
       break;
     case 'blur':
       el.textContent = cap.text;
-      el.style.filter = `blur(${Math.max(0, (1 - progress * 2)) * 8}px)`;
-      el.style.color = color;
+      el.style.filter = `blur(${Math.max(0,(1-p*2))*8}px)`;
       break;
     case 'rainbow':
       el.textContent = cap.text;
-      el.style.animation = 'rainbow-shift 2s linear infinite';
+      el.style.animation = 'rainbow-s 2s linear infinite';
       break;
     case 'scale':
       el.textContent = cap.text;
-      el.style.transform = `scale(${0.8 + Math.sin(progress * Math.PI) * 0.4})`;
-      el.style.color = color;
+      el.style.transform = `scale(${0.8+Math.sin(p*Math.PI)*0.4})`;
       break;
     case 'spotlight': {
-      const pct = Math.min(progress * 200, 200);
-      el.innerHTML = `<span style="background:linear-gradient(90deg,transparent 0%,${color} 50%,transparent 100%);background-size:200% 100%;background-position:${pct}% center;-webkit-background-clip:text;-webkit-text-fill-color:transparent">${cap.text}</span>`;
+      const pct = Math.min(p * 200, 200);
+      el.textContent = cap.text;
+      el.style.background = `linear-gradient(90deg,transparent 0%,${color} 50%,transparent 100%)`;
+      el.style.backgroundSize = '200%';
+      el.style.backgroundPosition = pct + '% center';
+      el.style.webkitBackgroundClip = 'text';
+      el.style.webkitTextFillColor = 'transparent';
       break;
     }
   }
 }
 
 // ─── Waveform ───
-function drawWaveform(buffer) {
-  const canvas = document.getElementById('waveformCanvas');
+function drawWave() {
+  if (!state.analyser) return;
+  const canvas = document.getElementById('waveCanvas');
   const ctx = canvas.getContext('2d');
+  const bl = state.analyser.frequencyBinCount;
+  const arr = new Uint8Array(bl);
+  state.analyser.getByteFrequencyData(arr);
+
   canvas.width = canvas.offsetWidth * 2;
   canvas.height = canvas.offsetHeight * 2;
-  const data = buffer.getChannelData(0);
-  const step = Math.ceil(data.length / canvas.width);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < canvas.width; i++) {
-    let min = 1, max = -1;
-    for (let j = 0; j < step; j++) {
-      const d = data[i * step + j] || 0;
-      if (d < min) min = d;
-      if (d > max) max = d;
-    }
-    const h = (max - min) * canvas.height * 0.5;
-    const y = (canvas.height - h) / 2;
-    ctx.fillStyle = 'rgba(108,92,231,0.4)';
-    ctx.fillRect(i, y, 1, Math.max(1, h));
+
+  const bw = canvas.width / bl * 2.5;
+  let x = 0;
+  for (let i = 0; i < bl; i++) {
+    const h = (arr[i]/255) * canvas.height * .8;
+    const r = arr[i]/255;
+    ctx.fillStyle = `rgba(${108+r*100},${92+r*80},231,${.3+r*.5})`;
+    ctx.fillRect(x, canvas.height-h, bw, h);
+    x += bw + 1;
   }
 }
 
-function drawLiveWaveform() {
-  if (!analyser) return;
-  const canvas = document.getElementById('waveformCanvas');
-  const ctx = canvas.getContext('2d');
-  const bufLen = analyser.frequencyBinCount;
-  const dataArr = new Uint8Array(bufLen);
-  analyser.getByteFrequencyData(dataArr);
+// ─── Upload ───
+function setupUpload() {
+  const area = document.getElementById('uploadArea');
+  const input = document.getElementById('audioFile');
+  area.onclick = () => input.click();
+  area.ondragover = e => { e.preventDefault(); area.style.borderColor = 'var(--accent)'; };
+  area.ondragleave = () => { area.style.borderColor = ''; };
+  area.ondrop = e => { e.preventDefault(); area.style.borderColor = ''; if(e.dataTransfer.files[0]) loadUserAudio(e.dataTransfer.files[0]); };
+  input.onchange = e => { if(e.target.files[0]) loadUserAudio(e.target.files[0]); };
+}
 
-  canvas.width = canvas.offsetWidth * 2;
-  canvas.height = canvas.offsetHeight * 2;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+async function loadUserAudio(file) {
+  stopPlay();
+  if (!state.audioCtx) state.audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const ab = await file.arrayBuffer();
+  state.audioBuf = await state.audioCtx.decodeAudioData(ab);
 
-  const barW = canvas.width / bufLen * 2.5;
-  let x = 0;
-  for (let i = 0; i < bufLen; i++) {
-    const h = (dataArr[i] / 255) * canvas.height * 0.8;
-    const r = dataArr[i] / 255;
-    ctx.fillStyle = `rgba(${108 + r * 100},${92 + r * 80},${231},${0.3 + r * 0.5})`;
-    ctx.fillRect(x, canvas.height - h, barW, h);
-    x += barW + 1;
-  }
+  // Create audio element for playback
+  const url = URL.createObjectURL(file);
+  const audio = new Audio(url);
+  await new Promise(r => audio.onloadedmetadata = r);
+  state.duration = audio.duration;
+
+  const words = "This is a simulated caption track connect an STT provider for real word level transcription".split(' ');
+  const wd = state.duration / words.length;
+  state.captions = words.map((w,i) => ({text:w,start:i*wd,end:(i+1)*wd}));
+
+  state.autoCycle = false;
+  showToast('Audio loaded! Press play.');
 }
 
 // ─── Export ───
 function setupExport() {
-  document.querySelectorAll('.export-btn').forEach(btn => {
-    btn.onclick = () => exportCaptions(btn.dataset.format);
+  document.querySelectorAll('.export-btn').forEach(b => {
+    b.onclick = () => exportCaps(b.dataset.fmt);
   });
 }
 
-function exportCaptions(format) {
-  if (!captions.length) { showToast('No captions to export. Load audio or use demo first.'); return; }
-  let content = '', ext = format;
+function exportCaps(fmt) {
+  if (!state.captions.length) return showToast('No captions yet');
+  let txt = '';
+  if (fmt === 'srt') txt = state.captions.map((c,i) => `${i+1}\n${fS(c.start)} --> ${fS(c.end)}\n${c.text}\n`).join('\n');
+  else if (fmt === 'vtt') txt = 'WEBVTT\n\n' + state.captions.map((c,i) => `${i+1}\n${fS(c.start)} --> ${fS(c.end)}\n${c.text}\n`).join('\n');
+  else if (fmt === 'ass') txt = `[Script Info]\nScriptType: v4.00+\n\n[Events]\nFormat: Layer, Start, End, Style, Text\n` + state.captions.map(c => `Dialogue: 0,${fA(c.start)},${fA(c.end)},Default,${c.text}`).join('\n');
+  else txt = JSON.stringify(state.captions, null, 2);
 
-  switch (format) {
-    case 'srt':
-      content = captions.map((c, i) => `${i+1}\n${fmtSRT(c.start)} --> ${fmtSRT(c.end)}\n${c.text}\n`).join('\n');
-      break;
-    case 'vtt':
-      content = 'WEBVTT\n\n' + captions.map((c, i) => `${i+1}\n${fmtVTT(c.start)} --> ${fmtVTT(c.end)}\n${c.text}\n`).join('\n');
-      break;
-    case 'ass':
-      content = '[Script Info]\nScriptType: v4.00+\nPlayResX: 1920\nPlayResY: 1080\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, Bold\nStyle: Default,Arial,72,&H00FFFFFF,-1\n\n[Events]\nFormat: Layer, Start, End, Style, Text\n' +
-        captions.map(c => `Dialogue: 0,${fmtASS(c.start)},${fmtASS(c.end)},Default,${c.text}`).join('\n');
-      break;
-    case 'json':
-      content = JSON.stringify(captions, null, 2);
-      break;
-  }
-
-  // Download
-  const blob = new Blob([content], {type: 'text/plain'});
-  const url = URL.createObjectURL(blob);
+  const blob = new Blob([txt], {type:'text/plain'});
   const a = document.createElement('a');
-  a.href = url; a.download = `captions.${ext}`; a.click();
-  URL.revokeObjectURL(url);
-  showToast(`Exported as ${format.toUpperCase()}!`);
+  a.href = URL.createObjectURL(blob); a.download = `captions.${fmt}`; a.click();
+  showToast('Exported ' + fmt.toUpperCase());
 }
 
-function fmtSRT(s) {
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60), ms = Math.floor((s%1)*1000);
-  return `${pad(h)}:${pad(m)}:${pad(sec)},${String(ms).padStart(3,'0')}`;
-}
-function fmtVTT(s) {
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60), ms = Math.floor((s%1)*1000);
-  return `${pad(h)}:${pad(m)}:${pad(sec)}.${String(ms).padStart(3,'0')}`;
-}
-function fmtASS(s) {
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60), cs = Math.floor((s%1)*100);
-  return `${pad(h)}:${pad(m)}:${pad(sec)}.${String(cs).padStart(2,'0')}`;
-}
-function pad(n) { return String(n).padStart(2, '0'); }
+function fS(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=Math.floor(s%60),ms=Math.floor((s%1)*1000);return `${p(h)}:${p(m)}:${p(sc)},${String(ms).padStart(3,'0')}`}
+function fA(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=Math.floor(s%60),cs=Math.floor((s%1)*100);return `${p(h)}:${p(m)}:${p(sc)}.${String(cs).padStart(2,'0')}`}
+function p(n){return String(n).padStart(2,'0')}
 
 // ─── Customize ───
 function setupCustomize() {
-  const sizeSlider = document.getElementById('captionSize');
-  const sizeVal = document.getElementById('captionSizeVal');
-  sizeSlider.oninput = () => { sizeVal.textContent = sizeSlider.value; };
-}
-
-// ─── Install Copy ───
-function setupInstallCopy() {
-  document.getElementById('installCmd').onclick = () => {
+  document.getElementById('capSize').oninput = function() {
+    document.getElementById('capSizeVal').textContent = this.value;
+  };
+  document.getElementById('cmdBox').onclick = () => {
     navigator.clipboard.writeText('npx captioneer init my-video');
-    showToast('Copied to clipboard!');
+    showToast('Copied!');
   };
 }
 
 // ─── Toast ───
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
-
-// ─── Start ───
-init();
 </script>
 </body>
 </html>
