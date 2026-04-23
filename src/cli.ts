@@ -282,31 +282,27 @@ program
       process.exit(1);
     }
 
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(readFileSync(filePath, "utf-8"));
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`❌ Invalid JSON: ${msg}`);
-      process.exit(1);
-    }
-
-    const { translateCaptionData, assertCaptionDataShape } = await import(
-      "./translate.js"
-    );
-
-    let captions;
-    try {
-      captions = assertCaptionDataShape(parsed);
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`❌ ${msg}`);
-      process.exit(1);
-    }
-
     console.log(`🌐 Translating to ${opts.target}...`);
 
     try {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(readFileSync(filePath, "utf-8"));
+      } catch (e: unknown) {
+        const hint =
+          e instanceof SyntaxError
+            ? `Invalid JSON (${e.message})`
+            : e instanceof Error
+              ? e.message
+              : String(e);
+        throw new Error(hint);
+      }
+
+      const { translateCaptionData, assertCaptionDataShape } = await import(
+        "./translate.js"
+      );
+      const captions = assertCaptionDataShape(parsed);
+
       const translated = await translateCaptionData(captions, {
         targetLanguage: opts.target,
         apiKey: opts.apiKey,
@@ -323,9 +319,10 @@ program
       writeFileSync(outputPath, JSON.stringify(translated, null, 2));
       console.log(`\n✅ Translated captions saved to: ${outputPath}`);
       console.log(`📊 ${translated.segments.length} segments`);
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`❌ Translation failed: ${msg}`);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : String(error);
+      console.error(`❌ Error: ${message}`);
       process.exit(1);
     }
   });
