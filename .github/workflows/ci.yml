@@ -55,6 +55,9 @@ jobs:
   pages:
     runs-on: ubuntu-latest
     needs: build
+    # GitHub Pages environments typically allow only default-branch refs.
+    # PR workflows use refs/pull/N/merge, which fails environment protection.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     permissions:
       pages: write
