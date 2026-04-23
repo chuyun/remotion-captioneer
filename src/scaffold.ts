@@ -43,7 +43,7 @@ export function scaffoldProject(projectName: string, dir: string = "."): void {
         dependencies: {
           remotion: "^4.0.438",
           "@remotion/cli": "^4.0.438",
-          "remotion-captioneer": "^0.8.0",
+          "remotion-captioneer": "^0.9.0",
           react: "^18.3.1",
           "react-dom": "^18.3.1",
         },

@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import { AbsoluteFill } from "remotion";
 import type { CaptionComponentProps, CaptionStyle } from "../types.js";
 import { WordHighlight } from "./WordHighlight.js";
 import { Karaoke } from "./Karaoke.js";
@@ -45,42 +46,52 @@ export const AnimatedCaptions: React.FC<CaptionComponentProps> = ({
   fontColor,
   highlightColor,
   position = "bottom",
+  textDirection,
 }) => {
+  const dirStyle: React.CSSProperties | undefined =
+    textDirection && textDirection !== "auto"
+      ? { direction: textDirection }
+      : undefined;
+
   const Component = styleMap[style];
 
   if (!Component) {
     console.warn(`Unknown caption style: "${style}". Falling back to "word-highlight".`);
     return (
-      <WordHighlight
+      <AbsoluteFill style={dirStyle}>
+        <WordHighlight
+          captions={captions}
+          fontFamily={fontFamily}
+          fontSize={fontSize}
+          fontColor={fontColor}
+          highlightColor={highlightColor}
+          position={position}
+        />
+      </AbsoluteFill>
+    );
+  }
+
+  return (
+    <AbsoluteFill style={dirStyle}>
+      <Component
         captions={captions}
         fontFamily={fontFamily}
         fontSize={fontSize}
         fontColor={fontColor}
         highlightColor={highlightColor}
+        waveColor={highlightColor}
+        glowColor={highlightColor}
+        pillColor={highlightColor}
+        flickerColor={highlightColor}
+        focusColor={highlightColor}
+        scaleColor={highlightColor}
+        spotlightColor={highlightColor}
+        fillColor={highlightColor}
+        bounceColor={highlightColor}
+        cursorColor={highlightColor}
+        eraseColor="#FF4444"
         position={position}
       />
-    );
-  }
-
-  return (
-    <Component
-      captions={captions}
-      fontFamily={fontFamily}
-      fontSize={fontSize}
-      fontColor={fontColor}
-      highlightColor={highlightColor}
-      waveColor={highlightColor}
-      glowColor={highlightColor}
-      pillColor={highlightColor}
-      flickerColor={highlightColor}
-      focusColor={highlightColor}
-      scaleColor={highlightColor}
-      spotlightColor={highlightColor}
-      fillColor={highlightColor}
-      bounceColor={highlightColor}
-      cursorColor={highlightColor}
-      eraseColor="#FF4444"
-      position={position}
-    />
+    </AbsoluteFill>
   );
 };

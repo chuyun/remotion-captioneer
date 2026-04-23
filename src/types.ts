@@ -71,6 +71,8 @@ export interface CaptionComponentProps {
   position?: "top" | "center" | "bottom";
   maxWidth?: number;
   wordsPerLine?: number;
+  /** Text direction for RTL scripts (e.g. Arabic, Hebrew). */
+  textDirection?: "ltr" | "rtl" | "auto";
 }
 
 /**

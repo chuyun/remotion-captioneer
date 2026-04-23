@@ -11,15 +11,21 @@
  */
 
 import { Command } from "commander";
-import { existsSync, writeFileSync } from "fs";
-import { resolve, basename, extname } from "path";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { dirname, join, resolve, basename, extname } from "path";
+import { fileURLToPath } from "url";
 
 const program = new Command();
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkgVersion = JSON.parse(
+  readFileSync(join(__dirname, "..", "package.json"), "utf-8")
+).version as string;
 
 program
   .name("captioneer")
   .description("Drop-in animated captions for Remotion — supports local Whisper, OpenAI, Groq, Deepgram, AssemblyAI")
-  .version("0.2.0");
+  .version(pkgVersion);
 
 program
   .command("process")
@@ -257,6 +263,68 @@ program
     wfs(outputPath, output);
     console.log(`✅ Exported to ${opts.format.toUpperCase()}: ${outputPath}`);
     console.log(`📊 ${captions.segments.length} segments`);
+  });
+
+program
+  .command("translate")
+  .description("Translate caption JSON to another language via OpenAI (preserves word timings)")
+  .argument("<caption-file>", "Path to caption JSON file")
+  .requiredOption("-t, --target <lang>", "Target language code (e.g. es, fr, de, ar, he)")
+  .option("-o, --output <path>", "Output JSON path")
+  .option("-k, --api-key <key>", "OpenAI API key (defaults to OPENAI_API_KEY)")
+  .option("-m, --model <model>", "OpenAI chat model", "gpt-4o-mini")
+  .action(async (captionFile: string, opts: any) => {
+    const { resolve: res, basename: bn, extname: ext } = await import("path");
+
+    const filePath = res(captionFile);
+    if (!existsSync(filePath)) {
+      console.error(`❌ File not found: ${filePath}`);
+      process.exit(1);
+    }
+
+    console.log(`🌐 Translating to ${opts.target}...`);
+
+    try {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(readFileSync(filePath, "utf-8"));
+      } catch (e: unknown) {
+        const hint =
+          e instanceof SyntaxError
+            ? `Invalid JSON (${e.message})`
+            : e instanceof Error
+              ? e.message
+              : String(e);
+        throw new Error(hint);
+      }
+
+      const { translateCaptionData, assertCaptionDataShape } = await import(
+        "./translate.js"
+      );
+      const captions = assertCaptionDataShape(parsed);
+
+      const translated = await translateCaptionData(captions, {
+        targetLanguage: opts.target,
+        apiKey: opts.apiKey,
+        model: opts.model,
+      });
+
+      const outputPath =
+        opts.output ??
+        res(
+          process.cwd(),
+          `${bn(filePath, ext(filePath))}-${opts.target}.json`
+        );
+
+      writeFileSync(outputPath, JSON.stringify(translated, null, 2));
+      console.log(`\n✅ Translated captions saved to: ${outputPath}`);
+      console.log(`📊 ${translated.segments.length} segments`);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : String(error);
+      console.error(`❌ Error: ${message}`);
+      process.exit(1);
+    }
   });
 
 program

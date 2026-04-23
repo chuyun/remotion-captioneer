@@ -623,6 +623,10 @@ npx captioneer presets
 npx captioneer export captions.json --format srt
 npx captioneer export captions.json --format vtt --output subs.vtt
 
+# Translate caption JSON (OpenAI; preserves word-level timings)
+npx captioneer translate captions.json --target es
+npx captioneer translate captions.json --target ar -o captions-ar.json
+
 # Batch process a directory of audio files
 npx captioneer batch ./audio-files/
 npx captioneer batch ./audio-files/ --provider groq --output-dir ./captions/
@@ -810,7 +814,7 @@ See the [`examples/`](https://github.com/neutral-Stage/remotion-captioneer/tree/
 
 - [ ] Caption style marketplace (community-contributed styles)
 - [x] ~~AI-powered auto-emoji~~ (`autoGenerateReactions()` — keyword-based emoji generation from 60+ word→emoji mappings)
-- [ ] Multi-language caption support with RTL
+- [x] Multi-language caption support with RTL (OpenAI `translateCaptionData` + `captioneer translate`; `AnimatedCaptions` `textDirection="rtl"`)
 - [x] ~~Caption editor with visual timeline~~ (Preview server with playback controls, progress bar, beat markers, style selector)
 - [ ] Integration with video hosting APIs (YouTube, Vimeo)
 - [x] ~~Real-time caption rendering in browser~~ (`npx captioneer preview` — live browser-based caption rendering with audio sync)
