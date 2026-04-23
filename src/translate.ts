@@ -6,18 +6,83 @@
 import type { CaptionData, CaptionSegment, Word } from "./types.js";
 
 export type TranslateCaptionsOptions = {
-  /** BCP-47 language code, e.g. "es", "fr", "de", "ar", "he" */
+  /** BCP-47 language code, e.g. "es", "fr", "de", "ar", "he", "zh-Hans" */
   targetLanguage: string;
   /** Defaults to OPENAI_API_KEY */
   apiKey?: string;
   /** Chat model (default gpt-4o-mini) */
   model?: string;
+  /** OpenAI request timeout in ms (default 120_000) */
+  timeoutMs?: number;
 };
+
+/** Segments per OpenAI request to avoid huge prompts and truncated JSON. */
+const SEGMENT_BATCH_SIZE = 25;
+
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
 type OpenAIChatResponse = {
   choices?: Array<{ message?: { content?: string | null } }>;
   error?: { message?: string };
 };
+
+/**
+ * Safe subset of BCP-47 tags for the system prompt (prevents prompt injection).
+ * Allows primary + optional subtags (letters/digits only in subtags).
+ */
+export function assertValidTargetLanguageTag(tag: string): string {
+  const trimmed = tag.trim();
+  if (trimmed.length < 2 || trimmed.length > 35) {
+    throw new Error(
+      `Invalid target language: length must be 2–35 characters after trim.`
+    );
+  }
+  // Alphanumeric + hyphens only; no spaces, quotes, or JSON-breaking chars.
+  if (!/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/.test(trimmed)) {
+    throw new Error(
+      `Invalid target language code "${tag.trim()}". Use a BCP-47 tag like es, fr-CA, zh-Hans.`
+    );
+  }
+  return trimmed;
+}
+
+export function assertCaptionDataShape(data: unknown): CaptionData {
+  if (!data || typeof data !== "object") {
+    throw new Error("Caption data must be a non-null object");
+  }
+  const o = data as Record<string, unknown>;
+  if (!Array.isArray(o.segments)) {
+    throw new Error('Invalid caption file: expected top-level "segments" array');
+  }
+  for (let i = 0; i < o.segments.length; i++) {
+    const seg = o.segments[i];
+    if (!seg || typeof seg !== "object") {
+      throw new Error(`Invalid segment at index ${i}: expected object`);
+    }
+    const words = (seg as Record<string, unknown>).words;
+    if (!Array.isArray(words)) {
+      throw new Error(`Invalid segment at index ${i}: expected "words" array`);
+    }
+    for (let j = 0; j < words.length; j++) {
+      const w = words[j];
+      if (!w || typeof w !== "object") {
+        throw new Error(`Invalid word at segment ${i}, word ${j}: expected object`);
+      }
+      if (typeof (w as Record<string, unknown>).word !== "string") {
+        throw new Error(
+          `Invalid word at segment ${i}, word ${j}: expected string "word" field`
+        );
+      }
+    }
+  }
+  if (typeof o.language !== "string") {
+    throw new Error('Invalid caption file: expected string "language" field');
+  }
+  if (typeof o.durationMs !== "number" || !Number.isFinite(o.durationMs)) {
+    throw new Error('Invalid caption file: expected finite number "durationMs"');
+  }
+  return data as CaptionData;
+}
 
 function parseJsonObject(content: string): Record<string, unknown> {
   const trimmed = content.trim();
@@ -29,8 +94,45 @@ function parseJsonObject(content: string): Record<string, unknown> {
   return JSON.parse(trimmed.slice(start, end + 1)) as Record<string, unknown>;
 }
 
-async function translateWordLists(
+async function fetchOpenAIChat(
+  body: Record<string, unknown>,
+  apiKey: string,
+  timeoutMs: number
+): Promise<OpenAIChatResponse> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(OPENAI_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    const json = (await res.json()) as OpenAIChatResponse;
+    if (!res.ok) {
+      throw new Error(
+        json.error?.message ?? `OpenAI request failed (${res.status})`
+      );
+    }
+    return json;
+  } catch (e: unknown) {
+    if (e instanceof Error && e.name === "AbortError") {
+      throw new Error(
+        `OpenAI request timed out after ${timeoutMs}ms. Try again or increase timeoutMs.`
+      );
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function translateWordListsBatch(
   segments: Array<{ words: string[] }>,
+  safeTargetLanguage: string,
   opts: TranslateCaptionsOptions
 ): Promise<string[][]> {
   const apiKey = opts.apiKey ?? process.env.OPENAI_API_KEY;
@@ -41,6 +143,9 @@ async function translateWordLists(
   }
 
   const model = opts.model ?? "gpt-4o-mini";
+  const timeoutMs = opts.timeoutMs ?? 120_000;
+
+  // safeTargetLanguage is already validated — safe to embed in instructions.
   const payload = {
     model,
     temperature: 0.2,
@@ -48,13 +153,16 @@ async function translateWordLists(
     messages: [
       {
         role: "system" as const,
-        content: `You translate subtitle/caption words for video. Target language: ${opts.targetLanguage}.
-Return JSON: {"segments":[{"words":["..."]}]}
-Rules:
-- Same number of segments as input, same order.
-- Each segment has the same number of words as input, same order.
-- Preserve punctuation attached to words (e.g. "hello," stays one token).
-- Do not add explanations.`,
+        content: [
+          "You translate subtitle/caption words for video.",
+          `Target language tag: ${safeTargetLanguage}`,
+          'Return JSON: {"segments":[{"words":["..."]}]}',
+          "Rules:",
+          "- Same number of segments as input, same order.",
+          "- Each segment has the same number of words as input, same order.",
+          '- Preserve punctuation attached to words (e.g. "hello," stays one token).',
+          "- Do not add explanations.",
+        ].join("\n"),
       },
       {
         role: "user" as const,
@@ -63,21 +171,7 @@ Rules:
     ],
   };
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const body = (await res.json()) as OpenAIChatResponse;
-  if (!res.ok) {
-    throw new Error(
-      body.error?.message ?? `OpenAI request failed (${res.status})`
-    );
-  }
+  const body = await fetchOpenAIChat(payload, apiKey, timeoutMs);
 
   const content = body.choices?.[0]?.message?.content;
   if (!content) {
@@ -94,7 +188,7 @@ Rules:
     if (!seg || typeof seg !== "object") {
       throw new Error(`Invalid segment at index ${i}`);
     }
-    const words = (seg as { words?: unknown }).words;
+    const { words } = seg as { words?: unknown };
     if (!Array.isArray(words) || !words.every((w) => typeof w === "string")) {
       throw new Error(`Invalid words array at segment ${i}`);
     }
@@ -110,11 +204,27 @@ export async function translateCaptionData(
   captionData: CaptionData,
   opts: TranslateCaptionsOptions
 ): Promise<CaptionData> {
+  const safeTargetLanguage = assertValidTargetLanguageTag(opts.targetLanguage);
+
   const input = captionData.segments.map((s) => ({
     words: s.words.map((w) => w.word),
   }));
 
-  const translatedLists = await translateWordLists(input, opts);
+  const translatedLists: string[][] = [];
+  for (let i = 0; i < input.length; i += SEGMENT_BATCH_SIZE) {
+    const batch = input.slice(i, i + SEGMENT_BATCH_SIZE);
+    const batchOut = await translateWordListsBatch(
+      batch,
+      safeTargetLanguage,
+      opts
+    );
+    if (batchOut.length !== batch.length) {
+      throw new Error(
+        `Translation batch at offset ${i}: expected ${batch.length} segments, got ${batchOut.length}`
+      );
+    }
+    translatedLists.push(...batchOut);
+  }
 
   if (translatedLists.length !== captionData.segments.length) {
     throw new Error("Translation returned wrong segment count");

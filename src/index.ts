@@ -190,5 +190,7 @@ export type { CaptioneerConfig } from "./config.js";
 // Translation (OpenAI)
 export {
   translateCaptionData,
+  assertValidTargetLanguageTag,
+  assertCaptionDataShape,
   type TranslateCaptionsOptions,
 } from "./translate.js";

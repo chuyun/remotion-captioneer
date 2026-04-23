@@ -282,27 +282,52 @@ program
       process.exit(1);
     }
 
-    const captions = JSON.parse(readFileSync(filePath, "utf-8"));
-    const { translateCaptionData } = await import("./translate.js");
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(readFileSync(filePath, "utf-8"));
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`❌ Invalid JSON: ${msg}`);
+      process.exit(1);
+    }
+
+    const { translateCaptionData, assertCaptionDataShape } = await import(
+      "./translate.js"
+    );
+
+    let captions;
+    try {
+      captions = assertCaptionDataShape(parsed);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`❌ ${msg}`);
+      process.exit(1);
+    }
 
     console.log(`🌐 Translating to ${opts.target}...`);
 
-    const translated = await translateCaptionData(captions, {
-      targetLanguage: opts.target,
-      apiKey: opts.apiKey,
-      model: opts.model,
-    });
+    try {
+      const translated = await translateCaptionData(captions, {
+        targetLanguage: opts.target,
+        apiKey: opts.apiKey,
+        model: opts.model,
+      });
 
-    const outputPath =
-      opts.output ??
-      res(
-        process.cwd(),
-        `${bn(filePath, ext(filePath))}-${opts.target}.json`
-      );
+      const outputPath =
+        opts.output ??
+        res(
+          process.cwd(),
+          `${bn(filePath, ext(filePath))}-${opts.target}.json`
+        );
 
-    writeFileSync(outputPath, JSON.stringify(translated, null, 2));
-    console.log(`\n✅ Translated captions saved to: ${outputPath}`);
-    console.log(`📊 ${translated.segments.length} segments`);
+      writeFileSync(outputPath, JSON.stringify(translated, null, 2));
+      console.log(`\n✅ Translated captions saved to: ${outputPath}`);
+      console.log(`📊 ${translated.segments.length} segments`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`❌ Translation failed: ${msg}`);
+      process.exit(1);
+    }
   });
 
 program
