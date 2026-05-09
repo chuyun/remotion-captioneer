@@ -102,7 +102,7 @@ footer{text-align:center;padding:20px;color:var(--tx2);font-size:11px;border-top
 
 <div class="hero">
   <h1>Remotion Captioneer</h1>
-  <p>14 caption styles · 5 STT providers · 24 presets · 7 exports · audio sync · templates · layouts · emoji · CLI</p>
+  <p>14 caption styles · 6 STT providers · 24 presets · 7 exports · audio sync · templates · layouts · emoji · CLI</p>
   <div class="hero-links">
     <a href="https://github.com/neutral-Stage/remotion-captioneer" target="_blank" class="bt bt1">⭐ GitHub</a>
     <a href="https://www.npmjs.com/package/remotion-captioneer" target="_blank" class="bt bt2">📦 npm</a>
@@ -137,10 +137,10 @@ footer{text-align:center;padding:20px;color:var(--tx2);font-size:11px;border-top
   </div>
 </section>
 
-<!-- ═══ 5 STT PROVIDERS ═══ -->
+<!-- ═══ 6 STT PROVIDERS ═══ -->
 <section class="sec">
   <div class="w">
-    <h2>🎤 5 STT Providers</h2>
+    <h2>🎤 6 STT Providers</h2>
     <p class="sub">Choose your speed, accuracy, and privacy trade-off</p>
     <div class="feat-grid">
       <div class="feat"><div class="feat-icon">🔒</div><h4>Whisper.cpp (Local)</h4><p>Free, offline, privacy-first. Runs on your machine.</p></div>
@@ -148,15 +148,16 @@ footer{text-align:center;padding:20px;color:var(--tx2);font-size:11px;border-top
       <div class="feat"><div class="feat-icon">⚡</div><h4>Groq</h4><p>Fastest inference — near real-time. Recommended.</p></div>
       <div class="feat"><div class="feat-icon">🏢</div><h4>Deepgram</h4><p>Enterprise grade with word-level timestamps.</p></div>
       <div class="feat"><div class="feat-icon">🎙️</div><h4>AssemblyAI</h4><p>Speaker diarization and sentiment built-in.</p></div>
+      <div class="feat"><div class="feat-icon">📝</div><h4>ElevenLabs Scribe</h4><p>Accurate transcription with word-level timing.</p></div>
     </div>
     <div class="code" style="margin-top:14px">
-<span class="kw">import</span> { transcribe } <span class="kw">from</span> <span class="st">'remotion-captioneer'</span>;
+<span class="kw">import</span> { createProvider } <span class="kw">from</span> <span class="st">'remotion-captioneer'</span>;
 
 <span class="cm">// Pick any provider</span>
-<span class="kw">const</span> captions = <span class="kw">await</span> transcribe(<span class="st">'audio.mp3'</span>, {
-  provider: <span class="st">'groq'</span>,    <span class="cm">// or 'openai' | 'deepgram' | 'assemblyai' | 'local'</span>
+<span class="kw">const</span> provider = createProvider(<span class="st">'elevenlabs'</span>); <span class="cm">// or 'groq' | 'openai' | 'deepgram' | 'assemblyai'</span>
+<span class="kw">const</span> captions = <span class="kw">await</span> provider.transcribe(<span class="st">'audio.mp3'</span>, {
+  model: <span class="st">'scribe_v2'</span>,
   language: <span class="st">'en'</span>,
-  wordLevel: <span class="kw">true</span>
 });
     </div>
   </div>
@@ -332,7 +333,7 @@ const STYLES=[
 ];
 const LINES=[
   "Add beautiful animated captions to your videos","Fourteen unique styles to choose from",
-  "Word level timing powered by five STT providers","Export to SRT VTT ASS TXT and more",
+  "Word level timing powered by six STT providers","Export to SRT VTT ASS TXT and more",
   "Built for Remotion the React video framework","Audio video sync with beat detection",
   "Twenty four curated presets across ten categories","Layout primitives for perfect positioning",
   "Auto generate emoji reactions from text","Free open source MIT license forever",
