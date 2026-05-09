@@ -243,7 +243,7 @@ function normalizeLanguageCode(language?: string): string {
 
   const code = language.trim();
   const mapped = LANGUAGE_CODE_MAP[code.toLowerCase()];
-  return mapped ?? code;
+  return mapped ?? code.toLowerCase();
 }
 
 function chunkWords(words: Word[]): CaptionSegment[] {
