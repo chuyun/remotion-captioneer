@@ -150,7 +150,7 @@ export class ElevenLabsProvider implements STTProvider {
     const words = transcripts
       .flatMap((transcript) => transcript.words ?? [])
       .filter(isTimedWord)
-      .sort((a, b) => (a.start ?? 0) - (b.start ?? 0))
+      .sort((a, b) => a.start - b.start)
       .map(toCaptionWord);
 
     const segments = chunkWords(words);
